@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  
+}
+
+enum Role {
+  CSO
+  ENTITY_HEAD
+  STAFF
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  passwordHash  String
+  fullName      String
+  role          Role
+  createdAt     DateTime @default(now())
+  managedEntity Entity?  @relation("EntityHead")
+  staffProfile  Staff?   @relation("UserProfile")
+  auditLogs     AuditLog[]
+}
+
+model Entity {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  category            String?
+  securityClearanceStatus String?
+  securityProgramStatus   String?
+  qcpStatus               String?
+  qcpSubmissionDate       DateTime?
+  contractValidFrom   DateTime?
+  contractValidTo     DateTime?
+  ascoUserId          Int?      @unique
+  ascoUser            User?     @relation("EntityHead", fields: [ascoUserId], references: [id])
+  ascoName            String?
+  ascoContactNo       String?
+  ascoEmail           String?
+  ascoTrainingValidFrom DateTime?
+  ascoTrainingValidTo   DateTime?
+  kialPocName         String?
+  kialPocNumber       String?
+  kialPocEmail        String?
+  staffMembers        Staff[]
+  certificates        EntityCertificate[]
+}
+
+model Staff {
+  id            Int      @id @default(autoincrement())
+  fullName      String
+  designation   String?
+  aadhaarNumber String?
+  isKialStaff        Boolean   @default(false)
+  empCode            String?
+  department         String?
+  dateOfSuperannuation DateTime?
+  entityId      Int?
+  entity        Entity?  @relation(fields: [entityId], references: [id])
+  userId        Int?     @unique
+  user          User?    @relation("UserProfile", fields: [userId], references: [id])
+  aepNumber     String?
+  aepValidFrom  DateTime?
+  aepValidTo    DateTime?
+  terminals     String?
+  airportsGiven String?
+  zones         String[]
+  phoneNumber   String?
+  avsecTrainingValidity DateTime?
+  pccValidity   DateTime?
+  medicalFitnessValidity DateTime?
+  certificates  Certificate[]
+}
+
+model Certificate {
+  id              Int            @id @default(autoincrement())
+  type            String
+  validFrom       DateTime?
+  validTo         DateTime?
+  docUrl          String?
+  proposedValidFrom DateTime?
+  proposedValidTo   DateTime?
+  proposedDocUrl    String?
+  status          ApprovalStatus @default(APPROVED)
+  staffId         Int
+  staff           Staff          @relation(fields: [staffId], references: [id])
+}
+
+model EntityCertificate {
+  id              Int            @id @default(autoincrement())
+  type            String
+  validFrom       DateTime?
+  validTo         DateTime?
+  docUrl          String?
+  status          ApprovalStatus @default(APPROVED)
+  entityId        Int
+  entity          Entity         @relation(fields: [entityId], references: [id])
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+}
