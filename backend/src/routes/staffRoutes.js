@@ -3,6 +3,8 @@ const router = express.Router();
 const staffController = require("../controllers/staffController");
 const { restrictTo } = require("../middleware/roleMiddleware");
 
+const docUpload = require("../middleware/docUploadMiddleware");
+
 // Staff Profile
 router.get("/profile", restrictTo("STAFF"), staffController.getMyProfile);
 router.put("/profile", restrictTo("STAFF"), staffController.updateMyProfile);
@@ -16,11 +18,13 @@ router.get(
 router.post(
   "/certificates",
   restrictTo("STAFF"),
+  docUpload.single("document"),
   staffController.createCertificate
 );
 router.put(
   "/certificates/:id",
   restrictTo("STAFF"),
+  docUpload.single("document"),
   staffController.updateCertificate
 );
 router.delete(

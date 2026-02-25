@@ -139,9 +139,9 @@ const AuditLogPage = () => {
     if (lower.includes("approv")) {
       return {
         icon: CheckCircle,
-        color: "text-purple-600",
-        bg: "bg-purple-50",
-        border: "border-purple-100",
+        color: "text-slate-600",
+        bg: "bg-slate-50",
+        border: "border-slate-100",
       };
     }
     if (lower.includes("reject")) {
@@ -181,7 +181,7 @@ const AuditLogPage = () => {
 
         <div className="flex gap-3">
           <div className="bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-            <div className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg">
+            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
               <Activity size={16} />
             </div>
             <div>
@@ -228,7 +228,7 @@ const AuditLogPage = () => {
                 placeholder="Search audit logs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-50 text-sm font-medium text-slate-900 placeholder:text-slate-400 pl-12 pr-4 py-3.5 rounded-2xl border border-transparent focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none transition-all"
+                className="w-full bg-slate-50 text-sm font-medium text-slate-900 placeholder:text-slate-400 pl-12 pr-4 py-3.5 rounded-2xl border border-transparent focus:bg-white focus:border-blue-100 focus:ring-2 focus:ring-blue-50 outline-none transition-all"
               />
             </div>
             <button
@@ -262,7 +262,7 @@ const AuditLogPage = () => {
                   placeholder="e.g. John Doe"
                   value={filterUser}
                   onChange={(e) => setFilterUser(e.target.value)}
-                  className="w-full bg-slate-50 text-sm font-medium p-3 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-indigo-50 outline-none"
+                  className="w-full bg-slate-50 text-sm font-medium p-3 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-50 outline-none"
                 />
               </div>
               <div>
@@ -274,7 +274,7 @@ const AuditLogPage = () => {
                   placeholder="e.g. Created, Deleted"
                   value={filterAction}
                   onChange={(e) => setFilterAction(e.target.value)}
-                  className="w-full bg-slate-50 text-sm font-medium p-3 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-indigo-50 outline-none"
+                  className="w-full bg-slate-50 text-sm font-medium p-3 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-50 outline-none"
                 />
               </div>
               <div>
@@ -285,7 +285,7 @@ const AuditLogPage = () => {
                   type="date"
                   value={dateFrom}
                   onChange={(e) => setDateFrom(e.target.value)}
-                  className="w-full bg-slate-50 text-sm font-medium p-3 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-indigo-50 outline-none"
+                  className="w-full bg-slate-50 text-sm font-medium p-3 rounded-xl border-transparent focus:bg-white focus:ring-2 focus:ring-blue-50 outline-none"
                 />
               </div>
               <div className="flex flex-col justify-end">
@@ -364,7 +364,7 @@ const AuditLogPage = () => {
                       {/* User Column */}
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold">
+                          <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 text-xs font-bold">
                             {log.user?.fullName?.charAt(0) || "U"}
                           </div>
                           <div className="flex flex-col">

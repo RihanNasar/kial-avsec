@@ -1,5 +1,12 @@
 const excelService = require("../services/excelService");
 const fs = require("fs");
+const { PrismaClient } = require("@prisma/client");
+const { PrismaPg } = require("@prisma/adapter-pg");
+const { Pool } = require("pg");
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 exports.uploadEntityReport = async (req, res) => {
   try {
@@ -79,6 +86,7 @@ exports.uploadKialStaff = async (req, res) => {
         successCount: result.success,
         errorCount: result.errors.length,
         errors: result.errors,
+        importedRows: result.importedRows,
       },
     });
   } catch (error) {
@@ -102,18 +110,30 @@ exports.uploadEntityStaff = async (req, res) => {
       });
     }
 
-    const { entityId } = req.params;
+    const { entityCode } = req.params;
 
-    if (!entityId || isNaN(entityId)) {
+    if (!entityCode || !entityCode.trim()) {
       return res.status(400).json({ 
         success: false,
-        message: "Valid entity ID is required." 
+        message: "A valid Entity ID (code) is required." 
       });
     }
 
-    console.log(`Received entity staff file for entity ${entityId}: ${req.file.originalname}`);
+    // Look up entity by externalEntityCode
+    const entity = await prisma.entity.findUnique({
+      where: { externalEntityCode: entityCode.trim() },
+    });
 
-    const result = await excelService.parseEntityStaffFile(req.file.path, entityId);
+    if (!entity) {
+      return res.status(404).json({
+        success: false,
+        message: `No entity found with Entity ID "${entityCode.trim()}". Please check the code on the Entities page.`,
+      });
+    }
+
+    console.log(`Received entity staff file for entity ${entity.name} (${entityCode}): ${req.file.originalname}`);
+
+    const result = await excelService.parseEntityStaffFile(req.file.path, entity.id);
 
     // Cleanup
     try {
@@ -131,6 +151,7 @@ exports.uploadEntityStaff = async (req, res) => {
         successCount: result.success,
         errorCount: result.errors.length,
         errors: result.errors,
+        importedRows: result.importedRows,
       },
     });
   } catch (error) {

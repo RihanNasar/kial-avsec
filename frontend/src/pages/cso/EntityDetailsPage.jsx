@@ -16,16 +16,21 @@ import {
   CreditCard,
   User,
   MoreHorizontal,
-  ExternalLink,
+  Edit2,
+  Eye,
+  Trash2,
+  Upload,
 } from "lucide-react";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import Alert from "../../components/Alert";
 import Modal from "../../components/Modal";
+import DocumentPreview from "../../components/DocumentPreview";
 import {
   formatDate,
-  getDaysUntilExpiry,
   getCertificateStatus,
+  getDaysUntilExpiry,
 } from "../../utils/helpers";
+import { authAPI } from "../../services/api";
 
 // Dynamic Badge Component based on status string
 const StatusBadge = ({ status }) => {
@@ -66,19 +71,36 @@ const EntityDetailsPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [availableCertTypes, setAvailableCertTypes] = useState([]);
 
-  // Modal State
+  // Certificate Modal State
   const [certificateModalOpen, setCertificateModalOpen] = useState(false);
+  const [editingEntityCert, setEditingEntityCert] = useState(null);
+  const [docPreviewUrl, setDocPreviewUrl] = useState(null);
   const [certificateFormData, setCertificateFormData] = useState({
     type: "",
+    customType: "",
     validFrom: "",
     validTo: "",
     docUrl: "",
+    file: null,
   });
+  const [uploadingFile, setUploadingFile] = useState(false);
 
+  // Add Staff form and modal state removed in favor of dedicated AddStaffPage
   useEffect(() => {
     fetchEntityDetails();
+    fetchCertificateTypes();
   }, [id]);
+
+  const fetchCertificateTypes = async () => {
+    try {
+      const res = await authAPI.getPublicCertificateTypes({ applicableTo: 'ENTITY' });
+      setAvailableCertTypes(res.data.data.map(t => t.name));
+    } catch (err) {
+      console.error("Failed to fetch certificate types", err);
+    }
+  };
 
   const fetchEntityDetails = async () => {
     try {
@@ -93,30 +115,93 @@ const EntityDetailsPage = () => {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await adminAPI.uploadDocument(formData);
+      setCertificateFormData((prev) => ({ ...prev, docUrl: res.data.data.url, file }));
+    } catch (err) {
+      setError("Failed to upload file");
+      setTimeout(() => setError(""), 3000);
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
   const handleAddCertificate = async (e) => {
     e.preventDefault();
+
+    const submitData = {
+      ...certificateFormData,
+      type: certificateFormData.type === "Other" ? certificateFormData.customType : certificateFormData.type,
+      docUrl: certificateFormData.docUrl || null,
+    };
+
     try {
-      const data = {
-        ...certificateFormData,
-        entityId: parseInt(id),
-      };
-      await adminAPI.createCertificate(data);
-      setSuccess("Certificate added successfully");
+      if (editingEntityCert) {
+        await adminAPI.updateEntityCertificate(editingEntityCert.id, submitData);
+        setSuccess("Certificate updated successfully");
+      } else {
+        const data = { ...submitData, entityId: parseInt(id) };
+        await adminAPI.createEntityCertificate(data);
+        setSuccess("Certificate added successfully");
+      }
       setCertificateModalOpen(false);
-      setCertificateFormData({
-        type: "",
-        validFrom: "",
-        validTo: "",
-        docUrl: "",
-      });
-      fetchEntityDetails(); // Refresh data to show new cert
+      setEditingEntityCert(null);
+      setCertificateFormData({ type: "", customType: "", validFrom: "", validTo: "", docUrl: "", file: null });
+      fetchEntityDetails();
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to add certificate");
+      setError(err.response?.data?.message || "Failed to save certificate");
       setTimeout(() => setError(""), 3000);
     }
   };
 
+  const handleEditEntityCert = (cert) => {
+    setEditingEntityCert(cert);
+    const isCustom = cert.type && !availableCertTypes.includes(cert.type);
+    setCertificateFormData({
+      type: isCustom ? "Other" : (cert.type || availableCertTypes[0] || ""),
+      customType: isCustom ? cert.type : "",
+      validFrom: cert.validFrom?.split("T")[0] || "",
+      validTo: cert.validTo?.split("T")[0] || "",
+      docUrl: cert.docUrl || "",
+      file: null,
+    });
+    setCertificateModalOpen(true);
+  };
+
+  const handleOpenAddCertModal = () => {
+    setEditingEntityCert(null);
+    setCertificateFormData({
+      type: availableCertTypes.length > 0 ? availableCertTypes[0] : "",
+      customType: "",
+      validFrom: "",
+      validTo: "",
+      docUrl: "",
+      file: null,
+    });
+    setCertificateModalOpen(true);
+  };
+
+  const handleDeleteEntityCert = async (certId) => {
+    if (!window.confirm("Delete this entity certificate?")) return;
+    try {
+      await adminAPI.deleteEntityCertificate(certId);
+      setSuccess("Certificate deleted");
+      fetchEntityDetails();
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError("Failed to delete certificate");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
+  // handleAddEntityStaff removed in favor of dedicated AddStaffPage
   // --- Real-time Calculations based on fetched data ---
 
   const entityCertStats = entity
@@ -193,9 +278,11 @@ const EntityDetailsPage = () => {
             <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-slate-200 text-slate-600 border border-slate-300">
               {entity.category || "General"}
             </span>
-            <span className="text-xs text-slate-400 font-medium font-mono">
-              ID: {entity.id}
-            </span>
+            {entity.externalEntityCode && (
+              <span className="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-50 text-blue-600 border border-blue-100 font-mono">
+                ID: {entity.externalEntityCode}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -229,7 +316,7 @@ const EntityDetailsPage = () => {
 
         <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group">
           <div className="flex justify-between items-start mb-4">
-            <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
               <Shield size={20} />
             </div>
           </div>
@@ -329,15 +416,22 @@ const EntityDetailsPage = () => {
           {/* Left Panel: Entity Information */}
           <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 h-full">
             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Building2 size={20} className="text-indigo-600" />
+              <Building2 size={20} className="text-blue-600" />
               Entity Information
             </h3>
 
             <div className="space-y-6">
               <div className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                  Clearance Status
-                </span>
+                <div>
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                    Clearance Status
+                  </span>
+                  {entity.securityClearanceValidTo && (
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      Expires: {formatDate(entity.securityClearanceValidTo)}
+                    </p>
+                  )}
+                </div>
                 <StatusBadge status={entity.securityClearanceStatus} />
               </div>
 
@@ -352,6 +446,11 @@ const EntityDetailsPage = () => {
                   >
                     {entity.securityProgramStatus || "N/A"}
                   </p>
+                  {entity.securityProgramValidTo && (
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Expires: {formatDate(entity.securityProgramValidTo)}
+                    </p>
+                  )}
                 </div>
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">
@@ -363,6 +462,11 @@ const EntityDetailsPage = () => {
                   >
                     {entity.qcpStatus || "N/A"}
                   </p>
+                  {entity.qcpValidTo && (
+                    <p className="text-[10px] text-slate-400 mt-1">
+                      Expires: {formatDate(entity.qcpValidTo)}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -422,22 +526,22 @@ const EntityDetailsPage = () => {
                 </div>
 
                 {/* KIAL POC */}
-                <div className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
-                  <p className="text-[10px] font-bold text-indigo-400 uppercase mb-2">
+                <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                  <p className="text-[10px] font-bold text-blue-400 uppercase mb-2">
                     KIAL Point of Contact
                   </p>
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 font-bold text-indigo-900 text-sm">
-                      <User size={14} className="text-indigo-400" />{" "}
+                    <div className="flex items-center gap-2 font-bold text-blue-900 text-sm">
+                      <User size={14} className="text-blue-400" />{" "}
                       {entity.kialPocName || "N/A"}
                     </div>
                     {entity.kialPocNumber && (
-                      <div className="flex items-center gap-2 text-indigo-700 text-xs pl-6">
+                      <div className="flex items-center gap-2 text-blue-700 text-xs pl-6">
                         <Phone size={12} /> {entity.kialPocNumber}
                       </div>
                     )}
                     {entity.kialPocEmail && (
-                      <div className="flex items-center gap-2 text-indigo-700 text-xs pl-6">
+                      <div className="flex items-center gap-2 text-blue-700 text-xs pl-6">
                         <Mail size={12} /> {entity.kialPocEmail}
                       </div>
                     )}
@@ -505,7 +609,7 @@ const EntityDetailsPage = () => {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                           <FileText size={20} />
                         </div>
                         <div>
@@ -529,16 +633,20 @@ const EntityDetailsPage = () => {
                       <div className="flex items-center gap-3 self-end sm:self-center">
                         <StatusBadge status={status} />
                         {cert.docUrl && (
-                          <a
-                            href={cert.docUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                          <button
+                            onClick={() => setDocPreviewUrl(cert.docUrl)}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer border-0 bg-transparent"
                             title="View Document"
                           >
-                            <ExternalLink size={16} />
-                          </a>
+                            <FileText size={16} />
+                          </button>
                         )}
+                        <button onClick={() => handleEditEntityCert(cert)} className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit">
+                          <Edit2 size={16} />
+                        </button>
+                        <button onClick={() => handleDeleteEntityCert(cert.id)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -553,7 +661,7 @@ const EntityDetailsPage = () => {
               </p>
               <button
                 onClick={() => setCertificateModalOpen(true)}
-                className="mt-4 text-sm font-bold text-indigo-600 hover:underline"
+                className="mt-4 text-sm font-bold text-blue-600 hover:underline"
               >
                 Add First Certificate
               </button>
@@ -565,120 +673,99 @@ const EntityDetailsPage = () => {
       {/* --- STAFF TAB --- */}
       {activeTab === "staff" && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-slate-900">Entity Staff Members</h3>
+            <button
+              onClick={() => navigate(`/staff/new?entityId=${id}`)}
+              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-2xl text-sm font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all"
+            >
+              <Plus size={18} /> Add Staff
+            </button>
+          </div>
           {entity.staffMembers && entity.staffMembers.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6">
-              {entity.staffMembers.map((staff) => {
-                // Calculate dynamic stats for this specific staff member
-                const certStats = (staff.certificates || []).reduce(
-                  (acc, cert) => {
-                    const days = getDaysUntilExpiry(cert.validTo);
-                    if (days === null) return acc;
-                    if (days < 0) acc.expired++;
-                    else if (days <= 30) acc.expiring++;
-                    else acc.valid++;
-                    return acc;
-                  },
-                  { valid: 0, expiring: 0, expired: 0 }
-                );
+            <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
+              <div className="divide-y divide-slate-50">
+                {entity.staffMembers.map((staff) => {
+                  const certs = staff.certificates || [];
+                  const certStats = certs.reduce(
+                    (acc, cert) => {
+                      const days = getDaysUntilExpiry(cert.validTo);
+                      if (days === null) return acc;
+                      if (days < 0) acc.expired++;
+                      else if (days <= 30) acc.expiring++;
+                      else acc.valid++;
+                      return acc;
+                    },
+                    { valid: 0, expiring: 0, expired: 0 }
+                  );
 
-                return (
-                  <div
-                    key={staff.id}
-                    className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden"
-                  >
-                    {/* Staff Header Row */}
-                    <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-lg border border-slate-200">
-                          {staff.fullName.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 text-lg">
-                            {staff.fullName}
-                          </h4>
-                          <div className="flex items-center gap-3 text-sm text-slate-500">
-                            <span className="font-medium text-indigo-600">
-                              {staff.designation || "No designation"}
+                  return (
+                    <div
+                      key={staff.id}
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/60 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/entity-staff/${staff.id}`)}
+                    >
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">
+                        {staff.fullName.charAt(0)}
+                      </div>
+
+                      {/* Name + Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-slate-900 truncate">{staff.fullName}</p>
+                          {staff.empCode && (
+                            <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500 border border-slate-200 shrink-0">
+                              #{staff.empCode}
                             </span>
-                            {staff.aadhaarNumber && (
-                              <span className="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-mono text-slate-500">
-                                ID: {staff.aadhaarNumber}
-                              </span>
-                            )}
-                          </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 mt-0.5">
+                          <span className="text-xs text-blue-600 font-medium">{staff.designation || "No designation"}</span>
+                          {staff.aadhaarNumber && (
+                            <span className="text-[10px] text-slate-400 font-mono">ID: {staff.aadhaarNumber}</span>
+                          )}
                         </div>
                       </div>
 
-                      {/* Individual Stats Pills */}
-                      <div className="flex gap-3">
-                        <div className="px-4 py-2 bg-emerald-50 rounded-xl text-center min-w-[80px] border border-emerald-100">
-                          <span className="block text-xl font-bold text-emerald-700 leading-none">
-                            {certStats.valid}
+                      {/* Cert Summary Pills */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {certStats.valid > 0 && (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
+                            {certStats.valid} valid
                           </span>
-                          <span className="text-[10px] font-bold text-emerald-600 uppercase">
-                            Valid
+                        )}
+                        {certStats.expiring > 0 && (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-amber-50 text-amber-600 border border-amber-100">
+                            {certStats.expiring} expiring
                           </span>
-                        </div>
-                        <div className="px-4 py-2 bg-amber-50 rounded-xl text-center min-w-[80px] border border-amber-100">
-                          <span className="block text-xl font-bold text-amber-700 leading-none">
-                            {certStats.expiring}
+                        )}
+                        {certStats.expired > 0 && (
+                          <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-red-50 text-red-600 border border-red-100">
+                            {certStats.expired} expired
                           </span>
-                          <span className="text-[10px] font-bold text-amber-600 uppercase">
-                            Expiring
+                        )}
+                        {certs.length === 0 && (
+                          <span className="text-[10px] text-slate-400 px-2 py-1 bg-slate-50 rounded-lg border border-slate-100">
+                            No certs
                           </span>
-                        </div>
-                        <div className="px-4 py-2 bg-red-50 rounded-xl text-center min-w-[80px] border border-red-100">
-                          <span className="block text-xl font-bold text-red-700 leading-none">
-                            {certStats.expired}
-                          </span>
-                          <span className="text-[10px] font-bold text-red-600 uppercase">
-                            Expired
-                          </span>
-                        </div>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => navigate(`/entity-staff/${staff.id}`)}
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                          title="View Details"
+                        >
+                          <Eye size={16} />
+                        </button>
                       </div>
                     </div>
-
-                    {/* Staff Certificates List */}
-                    <div className="p-6 bg-slate-50/50">
-                      {staff.certificates && staff.certificates.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {staff.certificates.map((cert) => {
-                            const status = getCertificateStatus(
-                              cert.validFrom,
-                              cert.validTo
-                            );
-                            return (
-                              <div
-                                key={cert.id}
-                                className="p-4 bg-white rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-indigo-50 rounded-lg text-indigo-500">
-                                    <FileText size={16} />
-                                  </div>
-                                  <div>
-                                    <p className="text-sm font-bold text-slate-900">
-                                      {cert.type}
-                                    </p>
-                                    <p className="text-[11px] text-slate-500 font-medium">
-                                      Exp: {formatDate(cert.validTo)}
-                                    </p>
-                                  </div>
-                                </div>
-                                <StatusBadge status={status} />
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-center text-sm text-slate-400 italic py-2">
-                          No certificates found.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           ) : (
             <div className="bg-white rounded-[32px] p-12 text-center shadow-sm border border-slate-100">
@@ -694,33 +781,60 @@ const EntityDetailsPage = () => {
         </div>
       )}
 
-      {/* 5. Add Certificate Modal */}
+      {/* 5. Add/Edit Certificate Modal */}
       <Modal
         isOpen={certificateModalOpen}
-        onClose={() => setCertificateModalOpen(false)}
-        title="Add Entity Certificate"
+        onClose={() => { setCertificateModalOpen(false); setEditingEntityCert(null); setCertificateFormData({ type: "", customType: "", validFrom: "", validTo: "", docUrl: "" }); }}
+        title={editingEntityCert ? "Edit Entity Certificate" : "Add Entity Certificate"}
       >
         <form
           onSubmit={handleAddCertificate}
           className="space-y-5 font-['Poppins']"
         >
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Certificate Type *
-            </label>
-            <input
-              type="text"
-              required
-              value={certificateFormData.type}
-              onChange={(e) =>
-                setCertificateFormData({
-                  ...certificateFormData,
-                  type: e.target.value,
-                })
-              }
-              className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none transition-all"
-              placeholder="e.g., Security Clearance, QCP Certificate"
-            />
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                Certificate Type *
+              </label>
+              <select
+                required
+                value={certificateFormData.type}
+                onChange={(e) =>
+                  setCertificateFormData({
+                    ...certificateFormData,
+                    type: e.target.value,
+                  })
+                }
+                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-blue-100 focus:ring-2 focus:ring-blue-50 outline-none transition-all"
+              >
+                <option value="" disabled>Select Type</option>
+                {availableCertTypes.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+                <option value="Other">Other (Specify)</option>
+              </select>
+            </div>
+            
+            {certificateFormData.type === "Other" && (
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                  Specify Type *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={certificateFormData.customType}
+                  onChange={(e) =>
+                    setCertificateFormData({
+                      ...certificateFormData,
+                      customType: e.target.value,
+                    })
+                  }
+                  className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-blue-100 focus:ring-2 focus:ring-blue-50 outline-none transition-all"
+                  placeholder="e.g., Security Clearance"
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -738,7 +852,7 @@ const EntityDetailsPage = () => {
                     validFrom: e.target.value,
                   })
                 }
-                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none transition-all"
+                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-blue-100 focus:ring-2 focus:ring-blue-50 outline-none transition-all"
               />
             </div>
             <div>
@@ -755,32 +869,33 @@ const EntityDetailsPage = () => {
                     validTo: e.target.value,
                   })
                 }
-                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none transition-all"
+                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-blue-100 focus:ring-2 focus:ring-blue-50 outline-none transition-all"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Document URL
+              Document (PDF, Image)
             </label>
-            <div className="relative">
-              <input
-                type="url"
-                value={certificateFormData.docUrl}
-                onChange={(e) =>
-                  setCertificateFormData({
-                    ...certificateFormData,
-                    docUrl: e.target.value,
-                  })
-                }
-                className="w-full bg-slate-50 text-sm font-medium text-slate-900 pl-10 pr-3 py-3 rounded-xl border border-transparent focus:bg-white focus:border-indigo-100 focus:ring-2 focus:ring-indigo-50 outline-none transition-all"
-                placeholder="https://example.com/certificate.pdf"
-              />
-              <CreditCard
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors">
+                <Upload size={16} />
+                {uploadingFile ? "Uploading..." : "Choose File"}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
+                  onChange={handleFileUpload}
+                  disabled={uploadingFile}
+                />
+              </label>
+              {certificateFormData.docUrl && (
+                <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium">
+                  <CheckCircle size={14} />
+                  File uploaded
+                </div>
+              )}
             </div>
           </div>
 
@@ -796,11 +911,14 @@ const EntityDetailsPage = () => {
               type="submit"
               className="px-6 py-2 bg-slate-900 text-white font-bold text-sm rounded-xl hover:bg-slate-800 shadow-lg shadow-slate-900/20 transition-all"
             >
-              Add Certificate
+              {editingEntityCert ? "Update Certificate" : "Add Certificate"}
             </button>
           </div>
         </form>
       </Modal>
+
+      {/* End Modals */}
+      <DocumentPreview url={docPreviewUrl} onClose={() => setDocPreviewUrl(null)} />
     </div>
   );
 };

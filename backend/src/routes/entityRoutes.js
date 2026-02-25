@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const entityController = require("../controllers/entityController");
 const { restrictTo } = require("../middleware/roleMiddleware");
+const docUpload = require("../middleware/docUploadMiddleware");
 
 // Dashboard for Entity Head
 router.get(
@@ -18,6 +19,11 @@ router.put(
   restrictTo("ENTITY_HEAD"),
   entityController.upsertStaff
 );
+router.delete(
+  "/staff/:id",
+  restrictTo("ENTITY_HEAD"),
+  entityController.deleteStaff
+);
 
 // Certificate Management - Full CRUD
 router.get(
@@ -28,11 +34,13 @@ router.get(
 router.post(
   "/certificates",
   restrictTo("ENTITY_HEAD"),
+  docUpload.single("document"),
   entityController.createCertificate
 );
 router.put(
   "/certificates/:id",
   restrictTo("ENTITY_HEAD"),
+  docUpload.single("document"),
   entityController.updateCertificate
 );
 router.delete(
@@ -46,6 +54,32 @@ router.post(
   "/certificates/renew",
   restrictTo("ENTITY_HEAD"),
   entityController.requestCertificateRenewal
+);
+
+// Entity Certificate Management
+router.post(
+  "/entity-certificates",
+  restrictTo("ENTITY_HEAD"),
+  docUpload.single("document"),
+  entityController.createEntityCertificate
+);
+router.put(
+  "/entity-certificates/:id",
+  restrictTo("ENTITY_HEAD"),
+  docUpload.single("document"),
+  entityController.updateEntityCertificate
+);
+router.delete(
+  "/entity-certificates/:id",
+  restrictTo("ENTITY_HEAD"),
+  entityController.deleteEntityCertificate
+);
+
+// Exports
+router.get(
+  "/export/staff",
+  restrictTo("ENTITY_HEAD"),
+  entityController.exportStaff
 );
 
 module.exports = router;

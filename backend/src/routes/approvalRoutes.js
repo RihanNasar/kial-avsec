@@ -1,23 +1,23 @@
 const express = require("express");
 const router = express.Router();
-const approvalController = require("../controllers/approvalController");
+const globalApprovalController = require("../controllers/globalApprovalController");
 const { restrictTo } = require("../middleware/roleMiddleware");
 
 // Get pending approvals
 router.get(
   "/pending",
   restrictTo("CSO"),
-  approvalController.getPendingApprovals
+  globalApprovalController.getPendingRequests
 );
 
 // Get approval history
 router.get(
   "/history",
   restrictTo("CSO"),
-  approvalController.getApprovalHistory
+  globalApprovalController.getRequestHistory
 );
 
-// Approve or reject certificate
-router.put("/:id", restrictTo("CSO"), approvalController.approveCertificate);
+// Approve or reject any request
+router.put("/:id", restrictTo("CSO"), globalApprovalController.reviewApprovalRequest);
 
 module.exports = router;

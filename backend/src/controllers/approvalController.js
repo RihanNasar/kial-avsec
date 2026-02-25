@@ -215,13 +215,18 @@ exports.createCertificate = async (req, res, next) => {
   try {
     const { staffId, type, validFrom, validTo, docUrl } = req.body;
 
+    let finalDocUrl = docUrl || null;
+    if (req.file) {
+      finalDocUrl = `/uploads/documents/${req.file.filename}`;
+    }
+
     const certificate = await prisma.certificate.create({
       data: {
         staffId: parseInt(staffId),
         type,
         validFrom: new Date(validFrom),
         validTo: new Date(validTo),
-        docUrl,
+        docUrl: finalDocUrl,
         status: "APPROVED",
       },
       include: {
@@ -251,13 +256,18 @@ exports.updateCertificate = async (req, res, next) => {
     const { id } = req.params;
     const { type, validFrom, validTo, docUrl, status } = req.body;
 
+    let finalDocUrl = docUrl || undefined;
+    if (req.file) {
+      finalDocUrl = `/uploads/documents/${req.file.filename}`;
+    }
+
     const certificate = await prisma.certificate.update({
       where: { id: parseInt(id) },
       data: {
         ...(type && { type }),
         ...(validFrom && { validFrom: new Date(validFrom) }),
         ...(validTo && { validTo: new Date(validTo) }),
-        ...(docUrl && { docUrl }),
+        ...(finalDocUrl !== undefined && { docUrl: finalDocUrl }),
         ...(status && { status }),
       },
       include: {

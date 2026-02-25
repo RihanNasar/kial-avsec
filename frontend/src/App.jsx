@@ -13,13 +13,17 @@ import EntityDetailsPage from "./pages/cso/EntityDetailsPage";
 import ApprovalsPage from "./pages/cso/ApprovalsPage";
 import StaffManagementPage from "./pages/cso/StaffManagementPage";
 import StaffDetailsPage from "./pages/cso/StaffDetailsPage";
+import AddStaffPage from "./pages/cso/AddStaffPage";
 import ImportDataPage from "./pages/cso/ImportDataPage";
 import AuditLogPage from "./pages/cso/AuditLogPage";
 import SystemOverviewPage from "./pages/cso/SystemOverviewPage";
+import CertificateTypesPage from "./pages/cso/CertificateTypesPage";
 
 // Entity Head Pages
 import EntityDashboard from "./pages/entity/EntityDashboard";
 import EntityStaffPage from "./pages/entity/EntityStaffPage";
+import EntityStaffDetailsPage from "./pages/entity/EntityStaffDetailsPage";
+import EntityCertificates from "./pages/entity/EntityCertificates";
 
 // Staff Pages
 import StaffProfile from "./pages/staff/StaffProfile";
@@ -39,7 +43,7 @@ const DashboardRouter = () => {
   if (user.role === "CSO") {
     return <Navigate to="/cso/dashboard" replace />;
   } else if (user.role === "ENTITY_HEAD") {
-    return <Navigate to="/entity/dashboard" replace />;
+    return <Navigate to={`/entity/${user.entityId}/dashboard`} replace />;
   } else if (user.role === "STAFF") {
     return <Navigate to="/staff/profile" replace />;
   }
@@ -119,11 +123,31 @@ function App() {
             }
           />
           <Route
+            path="/staff/new"
+            element={
+              <ProtectedRoute allowedRoles={["CSO"]}>
+                <Layout>
+                  <AddStaffPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/staff/:id"
             element={
               <ProtectedRoute allowedRoles={["CSO"]}>
                 <Layout>
                   <StaffDetailsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/entity-staff/:id"
+            element={
+              <ProtectedRoute allowedRoles={["CSO", "ENTITY_HEAD"]}>
+                <Layout>
+                  <EntityStaffDetailsPage />
                 </Layout>
               </ProtectedRoute>
             }
@@ -158,10 +182,20 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/settings/certificate-types"
+            element={
+              <ProtectedRoute allowedRoles={["CSO"]}>
+                <Layout>
+                  <CertificateTypesPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
 
           {/* Entity Head Routes */}
           <Route
-            path="/entity/dashboard"
+            path="/entity/:entityId/dashboard"
             element={
               <ProtectedRoute allowedRoles={["ENTITY_HEAD"]}>
                 <Layout>
@@ -171,11 +205,21 @@ function App() {
             }
           />
           <Route
-            path="/staff"
+            path="/entity/:entityId/staff"
             element={
               <ProtectedRoute allowedRoles={["ENTITY_HEAD"]}>
                 <Layout>
                   <EntityStaffPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/entity/:entityId/certificates"
+            element={
+              <ProtectedRoute allowedRoles={["ENTITY_HEAD"]}>
+                <Layout>
+                  <EntityCertificates />
                 </Layout>
               </ProtectedRoute>
             }
@@ -212,7 +256,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

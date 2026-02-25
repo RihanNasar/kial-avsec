@@ -15,11 +15,13 @@ import LoadingSpinner from "./LoadingSpinner";
 import Alert from "./Alert";
 import Modal from "./Modal";
 import StatusBadge from "./StatusBadge";
+import DocumentPreview from "./DocumentPreview";
 import {
   formatDate,
   getCertificateStatus,
   getDaysUntilExpiry,
 } from "../utils/helpers";
+import { authAPI } from "../services/api";
 
 const CertificatesPage = ({
   title,
@@ -32,6 +34,7 @@ const CertificatesPage = ({
   showStaffColumn = false,
 }) => {
   const [certificates, setCertificates] = useState([]);
+  const [certTypes, setCertTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -40,12 +43,14 @@ const CertificatesPage = ({
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState(null);
+  const [docPreviewUrl, setDocPreviewUrl] = useState(null);
   const [formData, setFormData] = useState({
-    type: "AVSEC",
+    type: "",
     validFrom: "",
     validTo: "",
-    docUrl: "",
+    document: null,
     staffId: "",
+    department: "",
   });
 
   useEffect(() => {
@@ -54,8 +59,12 @@ const CertificatesPage = ({
 
   const loadCertificates = async () => {
     try {
-      const response = await fetchCertificates();
+      const [response, typesRes] = await Promise.all([
+        fetchCertificates(),
+        authAPI.getPublicCertificateTypes({ applicableTo: 'ENTITY' })
+      ]);
       setCertificates(response.data.data || []);
+      setCertTypes(typesRes.data.data || []);
     } catch (err) {
       setError("Failed to load certificates");
       console.error(err);
@@ -70,20 +79,22 @@ const CertificatesPage = ({
     if (cert) {
       setEditingCert(cert);
       setFormData({
-        type: cert.type || "AVSEC",
+        type: cert.type || (certTypes.length > 0 ? certTypes[0].name : ""),
         validFrom: cert.validFrom?.split("T")[0] || "",
         validTo: cert.validTo?.split("T")[0] || "",
-        docUrl: cert.docUrl || "",
+        document: null,
         staffId: cert.staffId || "",
+        department: cert.department || "",
       });
     } else {
       setEditingCert(null);
       setFormData({
-        type: "AVSEC",
+        type: certTypes.length > 0 ? certTypes[0].name : "",
         validFrom: "",
         validTo: "",
-        docUrl: "",
+        document: null,
         staffId: staffList && staffList.length > 0 ? staffList[0].id : "",
+        department: "",
       });
     }
     setIsModalOpen(true);
@@ -100,9 +111,17 @@ const CertificatesPage = ({
     setError("");
 
     try {
-      const submitData = { ...formData };
+      const submitData = new FormData();
+      submitData.append("type", formData.type);
+      if (formData.validFrom) submitData.append("validFrom", formData.validFrom);
+      if (formData.validTo) submitData.append("validTo", formData.validTo);
+      if (formData.department) submitData.append("department", formData.department);
+      if (formData.document) {
+        submitData.append("document", formData.document);
+      }
+
       if (staffList) {
-        submitData.staffId = parseInt(formData.staffId);
+        submitData.append("staffId", parseInt(formData.staffId));
       }
 
       if (editingCert) {
@@ -237,6 +256,9 @@ const CertificatesPage = ({
                     </th>
                   )}
                   <th className="px-4 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    Organization
+                  </th>
+                  <th className="px-4 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                     Type
                   </th>
                   <th className="px-4 py-4 text-left text-[11px] font-bold text-slate-400 uppercase tracking-wider">
@@ -279,6 +301,20 @@ const CertificatesPage = ({
                         </td>
                       )}
 
+                      {/* Organization Column */}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-900">
+                            {cert.staff?.isKialStaff ? "KIAL" : "Entity"}
+                          </span>
+                          <span className="text-xs font-medium text-slate-500">
+                            {cert.staff?.isKialStaff
+                              ? cert.staff?.department || "N/A"
+                              : cert.staff?.entity?.name || "N/A"}
+                          </span>
+                        </div>
+                      </td>
+
                       {/* Type Column */}
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
@@ -286,7 +322,7 @@ const CertificatesPage = ({
                             <FileText size={14} />
                           </div>
                           <span className="text-sm font-medium text-slate-700">
-                            {cert.type}
+                            {certTypes.find(t => t.name === cert.type)?.name || cert.type}
                           </span>
                         </div>
                       </td>
@@ -318,15 +354,13 @@ const CertificatesPage = ({
                       <td className="px-4 py-4 whitespace-nowrap text-right pr-6">
                         <div className="flex items-center justify-end gap-2">
                           {cert.docUrl && (
-                            <a
-                              href={cert.docUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                            <button
+                              onClick={() => setDocPreviewUrl(cert.docUrl)}
+                              className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors cursor-pointer border-0 bg-transparent"
                               title="View Document"
                             >
-                              <ExternalLink size={16} />
-                            </a>
+                              <FileText size={16} />
+                            </button>
                           )}
                           <button
                             onClick={() => handleOpenModal(cert)}
@@ -405,12 +439,30 @@ const CertificatesPage = ({
               }
               required
             >
-              <option value="AVSEC">AVSEC Training</option>
-              <option value="PCC">Police Clearance Certificate</option>
-              <option value="BCAS">BCAS Clearance</option>
-              <option value="Other">Other</option>
+              {certTypes.map(t => (
+                <option key={t.id} value={t.name}>{t.name}</option>
+              ))}
             </select>
           </div>
+
+          {/* Department (only for KIAL Internal) */}
+          {formData.type === "KIAL_INTERNAL" && (
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                Department *
+              </label>
+              <input
+                type="text"
+                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-red-100 focus:ring-2 focus:ring-red-50 outline-none transition-all"
+                value={formData.department}
+                onChange={(e) =>
+                  setFormData({ ...formData, department: e.target.value })
+                }
+                placeholder="e.g. Operations, Security, Maintenance"
+                required
+              />
+            </div>
+          )}
 
           {/* Date Range */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -444,20 +496,22 @@ const CertificatesPage = ({
             </div>
           </div>
 
-          {/* Document URL */}
+          {/* Document File Upload */}
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Document URL
+              Document Attachment
             </label>
             <input
-              type="url"
-              className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-red-100 focus:ring-2 focus:ring-red-50 outline-none transition-all"
-              value={formData.docUrl}
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
               onChange={(e) =>
-                setFormData({ ...formData, docUrl: e.target.value })
+                setFormData({ ...formData, document: e.target.files[0] })
               }
-              placeholder="https://..."
+              className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-red-100 focus:ring-2 focus:ring-red-50 outline-none transition-all file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
             />
+            <p className="text-[11px] text-slate-500 mt-1 font-medium">
+              {editingCert && !formData.document ? "Leave empty to keep existing document" : "Maximum file size: 10MB. Allowed: PDF, Images, Word."}
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-50">
@@ -477,6 +531,7 @@ const CertificatesPage = ({
           </div>
         </form>
       </Modal>
+      <DocumentPreview url={docPreviewUrl} onClose={() => setDocPreviewUrl(null)} />
     </div>
   );
 };

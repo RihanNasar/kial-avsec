@@ -107,6 +107,7 @@ exports.login = async (req, res, next) => {
       where: { email },
       include: {
         staffProfile: true,
+        managedEntity: true,
       },
     });
 
@@ -140,7 +141,7 @@ exports.login = async (req, res, next) => {
           email: user.email,
           role: user.role,
           fullName: user.fullName,
-          entityId: user.staffProfile?.entityId || null,
+          entityId: user.managedEntity?.id || user.staffProfile?.entityId || null,
         },
       },
     });
@@ -234,6 +235,51 @@ exports.changePassword = async (req, res, next) => {
     res.json({
       success: true,
       message: "Password changed successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get configured certificate types for dropdowns
+ */
+exports.getCertificateTypes = async (req, res, next) => {
+  try {
+    const { applicableTo, department } = req.query;
+    const where = {};
+    if (applicableTo) {
+      if (applicableTo !== 'ALL') {
+        where.OR = [
+          { applicableTo },
+          { applicableTo: 'ALL' }
+        ];
+      } else {
+        where.applicableTo = applicableTo;
+      }
+    }
+    
+    // Add department filtering if provided
+    if (department && applicableTo === 'KIAL') {
+      where.AND = [
+        {
+          OR: [
+            { department: department },
+            { department: 'ALL' },
+            { department: null }
+          ]
+        }
+      ];
+    }
+
+    const types = await prisma.configuredCertificateType.findMany({
+      where,
+      orderBy: { name: 'asc' }
+    });
+
+    res.json({
+      success: true,
+      data: types,
     });
   } catch (error) {
     next(error);

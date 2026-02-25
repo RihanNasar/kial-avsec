@@ -18,16 +18,24 @@ import {
   Trash2,
   ExternalLink,
   BadgeCheck,
+  RefreshCw,
+  Copy,
+  Upload,
+  Eye,
+  EyeOff,
+  Key,
 } from "lucide-react";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import Alert from "../../components/Alert";
 import Modal from "../../components/Modal";
+import Alert from "../../components/Alert";
 import StatusBadge from "../../components/StatusBadge";
+import DocumentPreview from "../../components/DocumentPreview";
 import {
   formatDate,
   getDaysUntilExpiry,
   getCertificateStatus,
 } from "../../utils/helpers";
+import { authAPI } from "../../services/api";
 
 const StaffDetailsPage = () => {
   const { id } = useParams();
@@ -37,16 +45,23 @@ const StaffDetailsPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
+  const [availableCertTypes, setAvailableCertTypes] = useState([]);
+  const [showPassword, setShowPassword] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
 
   // Certificate Modal State
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState(null);
+  const [docPreviewUrl, setDocPreviewUrl] = useState(null);
   const [certFormData, setCertFormData] = useState({
-    type: "AVSEC",
+    type: "",
+    customType: "",
     validFrom: "",
     validTo: "",
     docUrl: "",
+    file: null,
   });
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // Staff Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -56,20 +71,30 @@ const StaffDetailsPage = () => {
     department: "",
     aadhaarNumber: "",
     aepNumber: "",
-    aepValidTo: "",
     terminals: "",
+    email: "",
   });
 
   useEffect(() => {
     fetchStaffDetails();
+    fetchCertificateTypes();
   }, [id]);
+
+  const fetchCertificateTypes = async () => {
+    try {
+      // Assuming we need all types or can filter by "ALL" and "KIAL" / "ENTITY"
+      const res = await authAPI.getPublicCertificateTypes();
+      setAvailableCertTypes(res.data.data.map(t => t.name));
+    } catch (err) {
+      console.error("Failed to fetch certificate types", err);
+    }
+  };
 
   const fetchStaffDetails = async () => {
     try {
       setLoading(true);
-      const response = await adminAPI.getStaff();
-      const allStaff = response.data.data || [];
-      const staffMember = allStaff.find((s) => s.id === parseInt(id));
+      const response = await adminAPI.getStaffById(id);
+      const staffMember = response.data.data;
       
       if (staffMember) {
         setStaff(staffMember);
@@ -88,19 +113,24 @@ const StaffDetailsPage = () => {
   const handleOpenCertModal = (cert = null) => {
     if (cert) {
       setEditingCert(cert);
+      const isCustom = !availableCertTypes.includes(cert.type);
       setCertFormData({
-        type: cert.type || "AVSEC",
+        type: isCustom ? "Other" : cert.type,
+        customType: isCustom ? cert.type : "",
         validFrom: cert.validFrom?.split("T")[0] || "",
         validTo: cert.validTo?.split("T")[0] || "",
         docUrl: cert.docUrl || "",
+        file: null,
       });
     } else {
       setEditingCert(null);
       setCertFormData({
-        type: "AVSEC",
+        type: availableCertTypes.length > 0 ? availableCertTypes[0] : "",
+        customType: "",
         validFrom: "",
         validTo: "",
         docUrl: "",
+        file: null,
       });
     }
     setIsCertModalOpen(true);
@@ -112,13 +142,33 @@ const StaffDetailsPage = () => {
     setError("");
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await adminAPI.uploadDocument(formData);
+      setCertFormData((prev) => ({ ...prev, docUrl: res.data.data.url, file }));
+    } catch (err) {
+      setError("Failed to upload file");
+      setTimeout(() => setError(""), 3000);
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
   const handleCertSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
       const submitData = {
-        ...certFormData,
+        type: certFormData.type === "Other" ? certFormData.customType : certFormData.type,
+        validFrom: certFormData.validFrom,
+        validTo: certFormData.validTo,
+        docUrl: certFormData.docUrl || null,
         staffId: staff.id,
       };
 
@@ -159,8 +209,8 @@ const StaffDetailsPage = () => {
       department: staff.department || "",
       aadhaarNumber: staff.aadhaarNumber || "",
       aepNumber: staff.aepNumber || "",
-      aepValidTo: staff.aepValidTo?.split("T")[0] || "",
       terminals: staff.terminals || "",
+      email: staff.user?.email || "",
     });
     setIsEditModalOpen(true);
   };
@@ -175,8 +225,7 @@ const StaffDetailsPage = () => {
     setError("");
 
     try {
-      // Note: You'll need to add an updateStaff endpoint to adminAPI
-      // For now, this is a placeholder
+      await adminAPI.updateStaff(staff.id, staffFormData);
       setSuccess("Staff information updated successfully");
       handleCloseEditModal();
       await fetchStaffDetails();
@@ -202,6 +251,10 @@ const StaffDetailsPage = () => {
     : { valid: 0, expiring: 0, expired: 0 };
 
   const totalIssues = certStats.expiring + certStats.expired;
+
+  // Derive AEP cert from certificates
+  const aepCert = staff?.certificates?.find((c) => c.type === "AEP" && c.status === "APPROVED");
+  const aepValidTo = aepCert?.validTo || null;
 
   if (loading) return <LoadingSpinner fullScreen />;
 
@@ -240,7 +293,7 @@ const StaffDetailsPage = () => {
             <span
               className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                 staff.isKialStaff
-                  ? "bg-indigo-100 text-indigo-700 border border-indigo-200"
+                  ? "bg-blue-100 text-blue-700 border border-blue-200"
                   : "bg-slate-200 text-slate-600 border border-slate-300"
               }`}
             >
@@ -383,7 +436,7 @@ const StaffDetailsPage = () => {
           {/* Left Panel: Personal Information */}
           <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 h-full">
             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <User size={20} className="text-indigo-600" />
+              <User size={20} className="text-blue-600" />
               Personal Information
             </h3>
 
@@ -425,17 +478,95 @@ const StaffDetailsPage = () => {
                 </div>
               </div>
 
-              <div className="p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                    <Phone size={12} />
+                    Phone Number
+                  </p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {staff.phoneNumber || "N/A"}
+                  </p>
+                </div>
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 flex items-center gap-1">
+                    <Mail size={12} />
+                    Email Address
+                  </p>
+                  <p className="text-sm font-bold text-slate-900 break-all">
+                    {staff.user?.email || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100">
                 <div className="flex items-center gap-2 mb-2">
-                  <Building2 size={16} className="text-indigo-600" />
-                  <p className="text-[10px] font-bold text-indigo-400 uppercase">
+                  <Building2 size={16} className="text-blue-600" />
+                  <p className="text-[10px] font-bold text-blue-400 uppercase">
                     Entity
                   </p>
                 </div>
-                <p className="text-sm font-bold text-indigo-900">
+                <p className="text-sm font-bold text-blue-900">
                   {staff.entity?.name || "N/A"}
                 </p>
               </div>
+
+              {/* Password Section */}
+              {staff.password && (
+                <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Key size={16} className="text-amber-600" />
+                    <p className="text-[10px] font-bold text-amber-500 uppercase">
+                      Login Password
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-bold text-amber-900 bg-amber-100/60 px-3 py-1.5 rounded-lg border border-amber-200 select-all flex-1">
+                      {showPassword ? staff.password : "••••••••••••"}
+                    </code>
+                    <button
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="p-2 text-amber-500 hover:text-amber-700 rounded-lg hover:bg-amber-100 transition-all"
+                      title={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(staff.password);
+                        setSuccess("Password copied to clipboard");
+                        setTimeout(() => setSuccess(""), 2000);
+                      }}
+                      className="p-2 text-amber-500 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-all"
+                      title="Copy password"
+                    >
+                      <Copy size={16} />
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm("Reset this staff member's password?")) return;
+                        setResettingPassword(true);
+                        try {
+                          const res = await adminAPI.resetStaffPassword(staff.id);
+                          setStaff({ ...staff, password: res.data.data.password });
+                          setShowPassword(true);
+                          setSuccess("Password reset successfully");
+                          setTimeout(() => setSuccess(""), 3000);
+                        } catch (err) {
+                          setError(err.response?.data?.message || "Failed to reset password");
+                        } finally {
+                          setResettingPassword(false);
+                        }
+                      }}
+                      disabled={resettingPassword}
+                      className="p-2 text-amber-500 hover:text-amber-700 rounded-lg hover:bg-amber-100 transition-all disabled:opacity-50"
+                      title="Reset password"
+                    >
+                      <RefreshCw size={16} className={resettingPassword ? "animate-spin" : ""} />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -463,14 +594,14 @@ const StaffDetailsPage = () => {
                 <div className="flex items-center gap-2">
                   <Calendar size={16} className="text-slate-400" />
                   <p className="text-sm font-bold text-slate-900">
-                    {staff.aepValidTo ? formatDate(staff.aepValidTo) : "N/A"}
+                    {aepValidTo ? formatDate(aepValidTo) : "N/A"}
                   </p>
                 </div>
-                {staff.aepValidTo && (
+                {aepValidTo && (
                   <p className="text-[10px] text-slate-500 mt-1">
-                    {getDaysUntilExpiry(staff.aepValidTo) !== null &&
-                    getDaysUntilExpiry(staff.aepValidTo) >= 0
-                      ? `${getDaysUntilExpiry(staff.aepValidTo)} days remaining`
+                    {getDaysUntilExpiry(aepValidTo) !== null &&
+                    getDaysUntilExpiry(aepValidTo) >= 0
+                      ? `${getDaysUntilExpiry(aepValidTo)} days remaining`
                       : "Expired"}
                   </p>
                 )}
@@ -504,7 +635,7 @@ const StaffDetailsPage = () => {
           <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <BadgeCheck size={20} className="text-purple-600" />
+                <BadgeCheck size={20} className="text-blue-600" />
                 Certificates Management
               </h3>
               <button
@@ -528,7 +659,7 @@ const StaffDetailsPage = () => {
                     >
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-purple-600">
+                          <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-blue-600">
                             <FileText size={20} />
                           </div>
                           <div>
@@ -563,15 +694,13 @@ const StaffDetailsPage = () => {
 
                       <div className="flex items-center gap-2 pt-4 border-t border-slate-200">
                         {cert.docUrl && (
-                          <a
-                            href={cert.docUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors"
+                          <button
+                            onClick={() => setDocPreviewUrl(cert.docUrl)}
+                            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl text-xs font-bold transition-colors cursor-pointer border border-blue-200"
                           >
-                            <ExternalLink size={14} />
+                            <FileText size={14} />
                             View Document
-                          </a>
+                          </button>
                         )}
                         <button
                           onClick={() => handleOpenCertModal(cert)}
@@ -618,23 +747,43 @@ const StaffDetailsPage = () => {
       >
         <form onSubmit={handleCertSubmit} className="space-y-5 font-['Poppins']">
           {/* Certificate Type */}
-          <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Certificate Type *
-            </label>
-            <select
-              className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-red-100 focus:ring-2 focus:ring-red-50 outline-none transition-all"
-              value={certFormData.type}
-              onChange={(e) =>
-                setCertFormData({ ...certFormData, type: e.target.value })
-              }
-              required
-            >
-              <option value="AVSEC">AVSEC Training</option>
-              <option value="PCC">Police Clearance Certificate</option>
-              <option value="BCAS">BCAS Clearance</option>
-              <option value="Other">Other</option>
-            </select>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                Certificate Type *
+              </label>
+              <select
+                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-red-100 focus:ring-2 focus:ring-red-50 outline-none transition-all"
+                value={certFormData.type}
+                onChange={(e) =>
+                  setCertFormData({ ...certFormData, type: e.target.value })
+                }
+                required
+              >
+                <option value="" disabled>Select Type</option>
+                {availableCertTypes.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+                <option value="Other">Other (Specify)</option>
+              </select>
+            </div>
+            
+            {certFormData.type === "Other" && (
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                  Specify Type *
+                </label>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-red-100 focus:ring-2 focus:ring-red-50 outline-none transition-all"
+                  value={certFormData.customType}
+                  onChange={(e) =>
+                    setCertFormData({ ...certFormData, customType: e.target.value })
+                  }
+                />
+              </div>
+            )}
           </div>
 
           {/* Date Range */}
@@ -669,20 +818,30 @@ const StaffDetailsPage = () => {
             </div>
           </div>
 
-          {/* Document URL */}
+          {/* Document Upload */}
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-              Document URL
+              Document (PDF, Image)
             </label>
-            <input
-              type="url"
-              className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-red-100 focus:ring-2 focus:ring-red-50 outline-none transition-all"
-              value={certFormData.docUrl}
-              onChange={(e) =>
-                setCertFormData({ ...certFormData, docUrl: e.target.value })
-              }
-              placeholder="https://..."
-            />
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 cursor-pointer transition-colors">
+                <Upload size={16} />
+                {uploadingFile ? "Uploading..." : "Choose File"}
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx"
+                  onChange={handleFileUpload}
+                  disabled={uploadingFile}
+                />
+              </label>
+              {certFormData.docUrl && (
+                <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium">
+                  <CheckCircle size={14} />
+                  File uploaded
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-50">
@@ -768,33 +927,18 @@ const StaffDetailsPage = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-                AEP Number
-              </label>
-              <input
-                type="text"
-                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-slate-200 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
-                value={staffFormData.aepNumber}
-                onChange={(e) =>
-                  setStaffFormData({ ...staffFormData, aepNumber: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-                AEP Valid To
-              </label>
-              <input
-                type="date"
-                className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-slate-200 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
-                value={staffFormData.aepValidTo}
-                onChange={(e) =>
-                  setStaffFormData({ ...staffFormData, aepValidTo: e.target.value })
-                }
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+              AEP Number
+            </label>
+            <input
+              type="text"
+              className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-slate-200 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
+              value={staffFormData.aepNumber}
+              onChange={(e) =>
+                setStaffFormData({ ...staffFormData, aepNumber: e.target.value })
+              }
+            />
           </div>
 
           <div>
@@ -809,6 +953,21 @@ const StaffDetailsPage = () => {
                 setStaffFormData({ ...staffFormData, terminals: e.target.value })
               }
               placeholder="e.g., T1, T2, or leave blank for all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+              Email Address (Login)
+            </label>
+            <input
+              type="email"
+              className="w-full bg-slate-50 text-sm font-medium text-slate-900 p-3 rounded-xl border border-transparent focus:bg-white focus:border-slate-200 focus:ring-2 focus:ring-slate-100 outline-none transition-all"
+              value={staffFormData.email}
+              onChange={(e) =>
+                setStaffFormData({ ...staffFormData, email: e.target.value })
+              }
+              placeholder="e.g., staff@example.com"
             />
           </div>
 
@@ -829,6 +988,7 @@ const StaffDetailsPage = () => {
           </div>
         </form>
       </Modal>
+      <DocumentPreview url={docPreviewUrl} onClose={() => setDocPreviewUrl(null)} />
     </div>
   );
 };

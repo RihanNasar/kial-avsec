@@ -51,8 +51,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       nodemailer:
-        specifier: ^7.0.11
-        version: 7.0.11
+        specifier: '6'
+        version: 6.9.16
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -677,8 +677,8 @@ packages:
   node-fetch-native@1.6.7:
     resolution: {integrity: sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q==}
 
-  nodemailer@7.0.11:
-    resolution: {integrity: sha512-gnXhNRE0FNhD7wPSCGhdNh46Hs6nm+uTyg+Kq0cZukNQiYdnCsoQjodNP9BQVG9XrcK/v6/MgpAPBUFyzh9pvw==}
+  nodemailer@6.9.16:
+    resolution: {integrity: sha512-psAuZdTIRN08HKVd/E8ObdV6NO7NTBY3KsC30F7M4H1OnmLCUNaS56FpYxyb26zWLSyYF9Ozch9KYHhHegsiOQ==}
     engines: {node: '>=6.0.0'}
 
   nodemon@3.1.11:
@@ -1702,7 +1702,7 @@ snapshots:
 
   node-fetch-native@1.6.7: {}
 
-  nodemailer@7.0.11: {}
+  nodemailer@6.9.16: {}
 
   nodemon@3.1.11:
     dependencies:

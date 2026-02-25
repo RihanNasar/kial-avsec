@@ -1,8 +1,11 @@
 const router = require("express").Router();
 const upload = require("../middleware/uploadMiddleware");
+const docUpload = require("../middleware/docUploadMiddleware");
 const importController = require("../controllers/importController");
+const exportController = require("../controllers/exportController");
 const adminController = require("../controllers/adminController");
 const approvalController = require("../controllers/approvalController");
+const globalApprovalController = require("../controllers/globalApprovalController");
 const { restrictTo } = require("../middleware/roleMiddleware");
 const {
   paginationQuery,
@@ -31,12 +34,23 @@ router.get(
 router.post("/entities", restrictTo("CSO"), adminController.upsertEntity);
 router.put("/entities/:id", restrictTo("CSO"), adminController.upsertEntity);
 router.delete("/entities/:id", restrictTo("CSO"), adminController.deleteEntity);
+router.post("/entities/:id/reset-password", restrictTo("CSO"), adminController.resetEntityPassword);
 
 // Entity Certificates
 router.post(
   "/entity-certificates",
   restrictTo("CSO"),
   adminController.createEntityCertificate
+);
+router.put(
+  "/entity-certificates/:id",
+  restrictTo("CSO"),
+  adminController.updateEntityCertificate
+);
+router.delete(
+  "/entity-certificates/:id",
+  restrictTo("CSO"),
+  adminController.deleteEntityCertificate
 );
 
 // Staff Management
@@ -48,6 +62,16 @@ router.get(
   adminController.getAllStaff
 );
 router.delete("/staff/:id", restrictTo("CSO"), adminController.deleteStaff);
+router.get("/staff/:id", restrictTo("CSO", "ENTITY_HEAD"), adminController.getStaffById);
+router.post("/staff", restrictTo("CSO"), adminController.createStaff);
+router.put("/staff/:id", restrictTo("CSO"), adminController.updateStaff);
+router.post("/staff/:id/reset-password", restrictTo("CSO"), adminController.resetStaffPassword);
+
+// Certificate Types Configuration
+router.get("/certificate-types", restrictTo("CSO"), adminController.getCertificateTypes);
+router.post("/certificate-types", restrictTo("CSO"), adminController.createCertificateType);
+router.put("/certificate-types/:id", restrictTo("CSO"), adminController.updateCertificateType);
+router.delete("/certificate-types/:id", restrictTo("CSO"), adminController.deleteCertificateType);
 
 // Certificate Management (CSO Full Access)
 router.get(
@@ -58,11 +82,13 @@ router.get(
 router.post(
   "/certificates",
   restrictTo("CSO"),
+  docUpload.single("document"),
   approvalController.createCertificate
 );
 router.put(
   "/certificates/:id",
   restrictTo("CSO"),
+  docUpload.single("document"),
   approvalController.updateCertificate
 );
 router.delete(
@@ -71,21 +97,21 @@ router.delete(
   approvalController.deleteCertificate
 );
 
-// Approvals
+// Approvals (using global approval controller for ApprovalRequest model)
 router.get(
   "/approvals/pending",
   restrictTo("CSO"),
-  approvalController.getPendingApprovals
+  globalApprovalController.getPendingRequests
 );
 router.get(
   "/approvals/history",
   restrictTo("CSO"),
-  approvalController.getApprovalHistory
+  globalApprovalController.getRequestHistory
 );
 router.put(
   "/approvals/:id",
   restrictTo("CSO"),
-  approvalController.approveCertificate
+  globalApprovalController.reviewApprovalRequest
 );
 
 // Data Import
@@ -104,10 +130,22 @@ router.post(
 );
 
 router.post(
-  "/import/entity-staff/:entityId",
+  "/import/entity-staff/:entityCode",
   restrictTo("CSO"),
   upload.single("file"),
   importController.uploadEntityStaff
+);
+
+// Data Export
+router.get("/export/entities", restrictTo("CSO"), exportController.exportEntities);
+router.get("/export/staff", restrictTo("CSO"), exportController.exportStaff);
+
+// Document Upload
+router.post(
+  "/upload/document",
+  restrictTo("CSO", "ENTITY_HEAD"),
+  docUpload.single("file"),
+  adminController.uploadCertificateDoc
 );
 
 module.exports = router;

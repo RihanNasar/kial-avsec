@@ -63,23 +63,33 @@ exports.updateMyProfile = async (req, res, next) => {
       return next(new AppError("Staff profile not found", 404));
     }
 
-    const updated = await prisma.staff.update({
-      where: { id: staff.id },
+    // Create an Approval Request instead of directly updating
+    const request = await prisma.approvalRequest.create({
       data: {
-        fullName,
-        designation,
-        aadhaarNumber,
-        department,
-      },
-      include: {
-        entity: true,
-        certificates: true,
-      },
+        entityType: "Staff",
+        entityId: staff.id,
+        action: "UPDATE",
+        payload: {
+          fullName,
+          designation,
+          aadhaarNumber,
+          department,
+        },
+        requestedBy: userId,
+        status: "PENDING",
+      }
+    });
+
+    // Mark staff as pending theoretically, though the main record stays active
+    await prisma.staff.update({
+      where: { id: staff.id },
+      data: { status: "PENDING" }
     });
 
     res.json({
       success: true,
-      data: updated,
+      message: "Profile update submitted for CSO approval",
+      data: staff,
     });
   } catch (error) {
     next(error);
@@ -103,6 +113,13 @@ exports.getMyCertificates = async (req, res, next) => {
 
     const certificates = await prisma.certificate.findMany({
       where: { staffId: staff.id },
+      include: {
+        staff: {
+          include: {
+            entity: true,
+          },
+        },
+      },
       orderBy: { validTo: "asc" },
     });
 
@@ -127,7 +144,13 @@ exports.getMyCertificates = async (req, res, next) => {
 exports.createCertificate = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { type, number, issuedBy, validFrom, validTo, documentUrl } = req.body;
+    const { type, validFrom, validTo, department, docUrl: stringDocUrl } = req.body;
+
+    // Fix handling of doc file from upload vs manual string url
+    let finalDocUrl = stringDocUrl || null;
+    if (req.file) {
+      finalDocUrl = `/uploads/documents/${req.file.filename}`;
+    }
 
     // Get staff profile
     const staff = await prisma.staff.findUnique({
@@ -143,22 +166,30 @@ exports.createCertificate = async (req, res, next) => {
       data: {
         staffId: staff.id,
         type,
-        number,
-        issuedBy,
-        validFrom: new Date(validFrom),
-        validTo: new Date(validTo),
-        documentUrl,
-        status: "PENDING",
+        department,
+        validFrom: validFrom ? new Date(validFrom) : null,
+        validTo: validTo ? new Date(validTo) : null,
+        docUrl: finalDocUrl,
+        status: "PENDING", 
       },
+    });
+
+    // Create an Approval Request for the CSO
+    await prisma.approvalRequest.create({
+      data: {
+        entityType: "Certificate",
+        entityId: certificate.id,
+        action: "CREATE",
+        requestedBy: userId,
+        status: "PENDING",
+      }
     });
 
     // Create audit log
     await prisma.auditLog.create({
       data: {
         action: `Certificate created: ${type}`,
-        userId: req.user.id,
-        entityType: "Certificate",
-        entityId: certificate.id,
+        userId: userId,
       },
     });
 
@@ -179,7 +210,7 @@ exports.updateCertificate = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    const { type, number, issuedBy, validFrom, validTo, documentUrl } = req.body;
+    const { type, validFrom, validTo, department, docUrl: stringDocUrl } = req.body;
 
     // Get staff profile
     const staff = await prisma.staff.findUnique({
@@ -203,34 +234,47 @@ exports.updateCertificate = async (req, res, next) => {
       return next(new AppError("You can only update your own certificates", 403));
     }
 
-    // Update certificate and reset to PENDING
-    const updated = await prisma.certificate.update({
+    let finalDocUrl = stringDocUrl || existing.docUrl;
+    if (req.file) {
+      finalDocUrl = `/uploads/documents/${req.file.filename}`;
+    }
+
+    // Set existing certificate to PENDING
+    await prisma.certificate.update({
       where: { id: parseInt(id) },
+      data: { status: "PENDING" },
+    });
+
+    // Create an Approval Request for the update
+    await prisma.approvalRequest.create({
       data: {
-        type,
-        number,
-        issuedBy,
-        validFrom: new Date(validFrom),
-        validTo: new Date(validTo),
-        documentUrl,
+        entityType: "Certificate",
+        entityId: parseInt(id),
+        action: "UPDATE",
+        requestedBy: userId,
         status: "PENDING",
-      },
+        payload: {
+          type: type || existing.type,
+          department: department !== undefined ? department : existing.department,
+          validFrom: validFrom ? new Date(validFrom) : existing.validFrom,
+          validTo: validTo ? new Date(validTo) : existing.validTo,
+          docUrl: finalDocUrl,
+        }
+      }
     });
 
     // Create audit log
     await prisma.auditLog.create({
       data: {
-        action: `Certificate updated: ${type}`,
+        action: `Certificate update requested: ${existing.type}`,
         userId: req.user.id,
-        entityType: "Certificate",
-        entityId: updated.id,
       },
     });
 
     res.json({
       success: true,
-      message: "Certificate updated and resubmitted for CSO approval",
-      data: updated,
+      message: "Certificate update submitted for CSO approval",
+      data: existing,
     });
   } catch (error) {
     next(error);
@@ -267,24 +311,51 @@ exports.deleteCertificate = async (req, res, next) => {
       return next(new AppError("You can only delete your own certificates", 403));
     }
 
-    // Delete certificate
-    await prisma.certificate.delete({
+    // If certificate was REJECTED, allow direct deletion without approval
+    if (certificate.status === "REJECTED") {
+      await prisma.certificate.delete({ where: { id: parseInt(id) } });
+
+      await prisma.auditLog.create({
+        data: {
+          action: `Rejected certificate deleted: ${certificate.type}`,
+          userId: req.user.id,
+        },
+      });
+
+      return res.json({
+        success: true,
+        message: "Rejected certificate deleted successfully",
+      });
+    }
+
+    // Set existing certificate to PENDING
+    await prisma.certificate.update({
       where: { id: parseInt(id) },
+      data: { status: "PENDING" },
+    });
+
+    // Create Approval Request instead of deleting directly
+    await prisma.approvalRequest.create({
+      data: {
+        entityType: "Certificate",
+        entityId: parseInt(id),
+        action: "DELETE",
+        requestedBy: userId,
+        status: "PENDING",
+      }
     });
 
     // Create audit log
     await prisma.auditLog.create({
       data: {
-        action: `Certificate deleted: ${certificate.type}`,
+        action: `Certificate deletion requested: ${certificate.type}`,
         userId: req.user.id,
-        entityType: "Certificate",
-        entityId: certificate.id,
       },
     });
 
     res.json({
       success: true,
-      message: "Certificate deleted successfully",
+      message: "Certificate deletion submitted for CSO approval",
     });
   } catch (error) {
     next(error);

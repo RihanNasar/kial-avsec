@@ -39,6 +39,7 @@ exports.protect = async (req, res, next) => {
       where: { id: decoded.userId },
       include: {
         staffProfile: true,
+        managedEntity: true,
       },
     });
 
@@ -54,7 +55,7 @@ exports.protect = async (req, res, next) => {
       email: user.email,
       role: user.role,
       fullName: user.fullName,
-      entityId: user.staffProfile?.entityId || null,
+      entityId: user.managedEntity?.id || user.staffProfile?.entityId || null,
     };
 
     next();

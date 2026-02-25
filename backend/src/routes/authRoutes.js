@@ -58,4 +58,7 @@ router.post(
   authController.changePassword
 );
 
+// Get configured certificate types for dropdowns (accessible to all logged-in users)
+router.get("/certificate-types", authMiddleware.protect, authController.getCertificateTypes);
+
 module.exports = router;
