@@ -201,6 +201,19 @@ const EntityDetailsPage = () => {
     }
   };
 
+  const handleDeleteStaff = async (staffId) => {
+    if (!window.confirm("Delete this staff member and all their certificates?")) return;
+    try {
+      await adminAPI.deleteStaff(staffId);
+      setSuccess("Staff member deleted successfully");
+      fetchEntityDetails();
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete staff member");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
   // handleAddEntityStaff removed in favor of dedicated AddStaffPage
   // --- Real-time Calculations based on fetched data ---
 
@@ -760,6 +773,13 @@ const EntityDetailsPage = () => {
                           title="View Details"
                         >
                           <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStaff(staff.id)}
+                          className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                          title="Delete Staff"
+                        >
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
