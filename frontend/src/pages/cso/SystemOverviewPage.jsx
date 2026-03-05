@@ -220,7 +220,7 @@ const SystemOverviewPage = () => {
         {keyMetrics.map((metric, index) => (
           <div
             key={index}
-            className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all"
+            className="neu-card-lg p-6 relative overflow-hidden group hover:shadow-md transition-all"
           >
             <div className="flex justify-between items-start mb-4">
               <div
@@ -240,7 +240,7 @@ const SystemOverviewPage = () => {
       {/* 3. Main Charts Row (Trends & Entity Dist) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Compliance Overview - Spans 2 cols */}
-        <div className="lg:col-span-2 bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+        <div className="lg:col-span-2 neu-card-lg p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h3 className="text-lg font-bold text-slate-900">
@@ -291,10 +291,10 @@ const SystemOverviewPage = () => {
         </div>
 
         {/* Entity Distribution (Bar) - Spans 1 col */}
-        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+        <div className="neu-card-lg p-8">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-bold text-slate-900">Entities</h3>
-            <MoreHorizontal className="text-slate-300 cursor-pointer" />
+            
           </div>
 
           <div className="h-[300px] w-full">
@@ -328,7 +328,7 @@ const SystemOverviewPage = () => {
       {/* 4. Circular Charts & Alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Certificate Status (Pie) */}
-        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 flex flex-col items-center">
+        <div className="neu-card-lg p-8 flex flex-col items-center">
           <h3 className="text-lg font-bold text-slate-900 w-full mb-4">
             Certificate Status
           </h3>
@@ -379,7 +379,7 @@ const SystemOverviewPage = () => {
         </div>
 
         {/* Alerts & Warnings Panel */}
-        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 flex flex-col">
+        <div className="neu-card-lg p-8 flex flex-col">
           <div className="flex items-center gap-2 mb-6">
             <AlertTriangle className="text-red-500" size={20} />
             <h3 className="text-lg font-bold text-slate-900">System Alerts</h3>
@@ -387,7 +387,7 @@ const SystemOverviewPage = () => {
 
           <div className="space-y-4 flex-grow">
             {/* Alert 1 */}
-            <div className="p-4 bg-white rounded-2xl border border-red-100 flex items-start justify-between group hover:border-red-200 transition-colors">
+            <div className="p-4 neu-card border border-red-100 flex items-start justify-between group hover:border-red-200 transition-colors">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">
                   Critical
@@ -405,7 +405,7 @@ const SystemOverviewPage = () => {
             </div>
 
             {/* Alert 2 */}
-            <div className="p-4 bg-white rounded-2xl border border-red-100 flex items-start justify-between group hover:border-red-200 transition-colors">
+            <div className="p-4 neu-card border border-red-100 flex items-start justify-between group hover:border-red-200 transition-colors">
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide block mb-1">
                   Warning
@@ -427,7 +427,7 @@ const SystemOverviewPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         
         {/* KIAL Departments Leaderboard */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div className="neu-card p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
@@ -480,7 +480,7 @@ const SystemOverviewPage = () => {
         </div>
 
         {/* External Entities Leaderboard */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div className="neu-card p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
@@ -534,7 +534,7 @@ const SystemOverviewPage = () => {
       </div>
 
       {/* 6. Bottom Quick Stats (Progress Bars) */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-8">
         <h3 className="text-lg font-bold text-slate-900 mb-6">
           Performance Metrics
         </h3>

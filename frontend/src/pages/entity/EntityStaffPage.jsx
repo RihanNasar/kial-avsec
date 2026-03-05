@@ -306,7 +306,7 @@ const EntityStaffPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-2">
+          <div className="bg-white px-4 py-2.5 rounded-2xl flex items-center gap-2">
             <Users size={16} className="text-blue-500" />
             <span className="text-xs font-bold text-slate-600">Total:</span>
             <span className="text-sm font-bold text-slate-900">{staff.length}</span>
@@ -340,7 +340,7 @@ const EntityStaffPage = () => {
       {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
 
       {/* Search Bar */}
-      <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-6">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input
@@ -354,7 +354,7 @@ const EntityStaffPage = () => {
       </div>
 
       {/* Staff List */}
-      <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 min-h-[400px]">
+      <div className="neu-card-lg p-6 min-h-[400px]">
         {filteredStaff.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
@@ -479,7 +479,7 @@ const EntityStaffPage = () => {
                           {certs.map((cert) => {
                             const status = getCertificateStatus(cert.validFrom, cert.validTo);
                             return (
-                              <div key={cert.id} className="p-3.5 bg-white rounded-xl border border-slate-100 shadow-sm flex items-center justify-between gap-3">
+                              <div key={cert.id} className="p-3.5 neu-card flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3 min-w-0">
                                   <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
                                     <FileText size={16} />
@@ -520,7 +520,7 @@ const EntityStaffPage = () => {
                           })}
                         </div>
                       ) : (
-                        <div className="text-center py-6 bg-white rounded-xl border border-dashed border-slate-200">
+                        <div className="text-center py-6 neu-card border border-dashed border-slate-200">
                           <FileText size={24} className="mx-auto text-slate-300 mb-2" />
                           <p className="text-xs text-slate-400 font-medium">No certificates yet</p>
                           <button

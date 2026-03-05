@@ -1,8 +1,9 @@
-// KIAL AVSEC Mobile - Staff Card Component
+// KIAL AVSEC Mobile — V3 Staff Card
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../theme';
+import theme from '../theme';
 import Badge from './ui/Badge';
 
 const StaffCard = ({ staff, onPress, showEntity = false }) => {
@@ -18,7 +19,7 @@ const StaffCard = ({ staff, onPress, showEntity = false }) => {
             <View style={styles.row}>
                 {/* Avatar */}
                 <View style={[styles.avatar, isKial && styles.avatarKial]}>
-                    <Text style={styles.avatarText}>
+                    <Text style={[styles.avatarText, isKial && styles.avatarTextKial]}>
                         {staff.fullName?.charAt(0)?.toUpperCase() || 'S'}
                     </Text>
                 </View>
@@ -40,7 +41,7 @@ const StaffCard = ({ staff, onPress, showEntity = false }) => {
                 <View style={styles.right}>
                     {isKial && <Badge label="KIAL" variant="info" size="sm" />}
                     <View style={styles.certCount}>
-                        <Ionicons name="document-text-outline" size={14} color={colors.textTertiary} />
+                        <Ionicons name="document-text-outline" size={13} color={colors.textTertiary} />
                         <Text style={styles.certText}>{certCount}</Text>
                     </View>
                 </View>
@@ -51,12 +52,13 @@ const StaffCard = ({ staff, onPress, showEntity = false }) => {
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: colors.white,
-        borderRadius: 14,
+        backgroundColor: colors.glassBgStrong,
+        borderRadius: theme.radius.md,
         borderWidth: 1,
-        borderColor: colors.border,
-        padding: spacing.base,
+        borderColor: colors.glassBorderSubtle,
+        padding: spacing.md,
         marginBottom: spacing.sm,
+        ...theme.shadow.sm,
     },
     row: {
         flexDirection: 'row',
@@ -65,20 +67,23 @@ const styles = StyleSheet.create({
     avatar: {
         width: 44,
         height: 44,
-        borderRadius: 12,
-        backgroundColor: colors.borderLight,
+        borderRadius: theme.radius.sm,
+        backgroundColor: colors.surfaceDim,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,
     },
     avatarKial: {
-        backgroundColor: colors.redLight,
+        backgroundColor: colors.primaryGlow,
     },
     avatarText: {
         fontSize: typography.size.md,
         fontWeight: typography.weight.bold,
-        color: colors.textPrimary,
+        color: colors.textSecondary,
         fontFamily: typography.family,
+    },
+    avatarTextKial: {
+        color: colors.primary,
     },
     info: {
         flex: 1,
@@ -98,7 +103,7 @@ const styles = StyleSheet.create({
     },
     entity: {
         fontSize: typography.size.xs,
-        color: colors.accent,
+        color: colors.primary,
         marginTop: 2,
         fontFamily: typography.family,
         fontWeight: typography.weight.medium,

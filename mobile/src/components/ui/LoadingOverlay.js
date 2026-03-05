@@ -1,11 +1,13 @@
-// KIAL AVSEC Mobile - Loading Overlay
+// KIAL AVSEC Mobile — V3 Loading Overlay
 import React from 'react';
 import { View, ActivityIndicator, Text, StyleSheet } from 'react-native';
-import { colors, typography } from '../../theme';
+import { colors, typography, spacing } from '../../theme';
 
 const LoadingOverlay = ({ message = 'Loading...' }) => (
     <View style={styles.container}>
-        <ActivityIndicator size="large" color={colors.primary} />
+        <View style={styles.spinnerWrap}>
+            <ActivityIndicator size="large" color={colors.primary} />
+        </View>
         <Text style={styles.message}>{message}</Text>
     </View>
 );
@@ -15,14 +17,24 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: colors.white,
-        padding: 24,
+        backgroundColor: colors.background,
+        padding: spacing.xxl,
+    },
+    spinnerWrap: {
+        width: 64,
+        height: 64,
+        borderRadius: 20,
+        backgroundColor: colors.glassBg,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: spacing.md,
     },
     message: {
-        marginTop: 16,
-        fontSize: typography.size.base,
+        fontSize: typography.size.sm,
         color: colors.textSecondary,
         fontFamily: typography.family,
+        fontWeight: typography.weight.medium,
+        letterSpacing: 0.2,
     },
 });
 

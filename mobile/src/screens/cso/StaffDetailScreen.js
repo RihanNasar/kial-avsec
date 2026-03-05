@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - Staff Detail Screen (CSO view)
+// KIAL AVSEC Mobile — V3 Staff Detail Screen (CSO view)
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, RefreshControl, StyleSheet, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -9,6 +9,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import CertificateCard from '../../components/CertificateCard';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 
 const StaffDetailScreen = ({ route }) => {
     const { staffId } = route.params;
@@ -30,11 +31,7 @@ const StaffDetailScreen = ({ route }) => {
         }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchStaff();
-        }, [staffId])
-    );
+    useFocusEffect(useCallback(() => { fetchStaff(); }, [staffId]));
 
     if (loading && !staff) return <LoadingOverlay />;
     if (!staff) return null;
@@ -56,7 +53,9 @@ const StaffDetailScreen = ({ route }) => {
             {/* Profile Header */}
             <View style={styles.profileHeader}>
                 <View style={[styles.avatar, staff.isKialStaff && styles.avatarKial]}>
-                    <Text style={styles.avatarText}>{staff.fullName?.charAt(0)?.toUpperCase()}</Text>
+                    <Text style={[styles.avatarText, staff.isKialStaff && styles.avatarTextKial]}>
+                        {staff.fullName?.charAt(0)?.toUpperCase()}
+                    </Text>
                 </View>
                 <Text style={styles.name}>{staff.fullName}</Text>
                 <Text style={styles.designation}>{staff.designation || 'Staff Member'}</Text>
@@ -67,7 +66,10 @@ const StaffDetailScreen = ({ route }) => {
             </View>
 
             {/* Details */}
-            <Text style={styles.sectionTitle}>Information</Text>
+            <View style={styles.sectionHeader}>
+                <View style={styles.sectionAccent} />
+                <Text style={styles.sectionTitle}>Information</Text>
+            </View>
             <Card>
                 <InfoRow label="Employee Code" value={staff.empCode} />
                 <InfoRow label="Department" value={staff.department} />
@@ -75,15 +77,16 @@ const StaffDetailScreen = ({ route }) => {
                 <InfoRow label="Aadhaar" value={staff.aadhaarNumber} />
                 <InfoRow label="Phone" value={staff.phoneNumber} />
                 <InfoRow label="Terminals" value={staff.terminals} />
-                {staff.zones?.length > 0 && (
-                    <InfoRow label="Zones" value={staff.zones.join(', ')} />
-                )}
+                {staff.zones?.length > 0 && <InfoRow label="Zones" value={staff.zones.join(', ')} />}
             </Card>
 
             {/* Certificates */}
             {staff.certificates?.length > 0 && (
                 <>
-                    <Text style={styles.sectionTitle}>Certificates ({staff.certificates.length})</Text>
+                    <View style={styles.sectionHeader}>
+                        <View style={styles.sectionAccent} />
+                        <Text style={styles.sectionTitle}>Certificates ({staff.certificates.length})</Text>
+                    </View>
                     {staff.certificates.map((cert) => (
                         <CertificateCard key={cert.id} certificate={cert} />
                     ))}
@@ -96,8 +99,8 @@ const StaffDetailScreen = ({ route }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.white },
-    content: { padding: spacing.lg },
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.screenPadding },
     profileHeader: {
         alignItems: 'center',
         paddingVertical: spacing.xl,
@@ -108,19 +111,20 @@ const styles = StyleSheet.create({
     avatar: {
         width: 72,
         height: 72,
-        borderRadius: 20,
-        backgroundColor: colors.borderLight,
+        borderRadius: theme.radius.xl,
+        backgroundColor: colors.surfaceDim,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: spacing.md,
     },
-    avatarKial: { backgroundColor: colors.redLight },
+    avatarKial: { backgroundColor: colors.primaryGlow },
     avatarText: {
         fontSize: typography.size.xxl,
         fontWeight: typography.weight.bold,
-        color: colors.textPrimary,
+        color: colors.textSecondary,
         fontFamily: typography.family,
     },
+    avatarTextKial: { color: colors.primary },
     name: {
         fontSize: typography.size.xl,
         fontWeight: typography.weight.bold,
@@ -138,13 +142,24 @@ const styles = StyleSheet.create({
         gap: spacing.sm,
         marginTop: spacing.md,
     },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: spacing.sectionGap,
+        marginBottom: spacing.md,
+    },
+    sectionAccent: {
+        width: 3,
+        height: 18,
+        backgroundColor: colors.primary,
+        borderRadius: 2,
+        marginRight: spacing.sm,
+    },
     sectionTitle: {
         fontSize: typography.size.md,
         fontWeight: typography.weight.bold,
         color: colors.textPrimary,
         fontFamily: typography.family,
-        marginTop: spacing.lg,
-        marginBottom: spacing.md,
     },
     infoRow: {
         flexDirection: 'row',

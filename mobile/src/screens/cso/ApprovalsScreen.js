@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - CSO Approvals Screen
+// KIAL AVSEC Mobile — V3 CSO Approvals Screen
 import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 import { formatDate } from '../../utils/dateHelpers';
 
 const ApprovalsScreen = () => {
@@ -81,19 +82,8 @@ const ApprovalsScreen = () => {
                 <Text style={styles.targetName}>{item.currentData.fullName}</Text>
             )}
             <View style={styles.actions}>
-                <Button
-                    title="Approve"
-                    size="sm"
-                    onPress={() => handleReview(item.id, 'APPROVED')}
-                    style={{ flex: 1, marginRight: 8 }}
-                />
-                <Button
-                    title="Reject"
-                    variant="danger"
-                    size="sm"
-                    onPress={() => handleReview(item.id, 'REJECTED')}
-                    style={{ flex: 1 }}
-                />
+                <Button title="Approve" size="sm" onPress={() => handleReview(item.id, 'APPROVED')} style={{ flex: 1, marginRight: 8 }} />
+                <Button title="Reject" variant="danger" size="sm" onPress={() => handleReview(item.id, 'REJECTED')} style={{ flex: 1 }} />
             </View>
         </View>
     );
@@ -101,11 +91,7 @@ const ApprovalsScreen = () => {
     const renderHistoryItem = ({ item }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
-                <Badge
-                    label={item.status}
-                    variant={item.status === 'APPROVED' ? 'success' : 'danger'}
-                    size="sm"
-                />
+                <Badge label={item.status} variant={item.status === 'APPROVED' ? 'success' : 'danger'} size="sm" />
                 <Text style={styles.entityType}>{item.entityType} · {item.action}</Text>
             </View>
             <Text style={styles.requester}>
@@ -124,6 +110,7 @@ const ApprovalsScreen = () => {
                 <TouchableOpacity
                     style={[styles.tab, tab === 'pending' && styles.activeTab]}
                     onPress={() => setTab('pending')}
+                    activeOpacity={0.7}
                 >
                     <Text style={[styles.tabText, tab === 'pending' && styles.activeTabText]}>
                         Pending ({pending.length})
@@ -132,6 +119,7 @@ const ApprovalsScreen = () => {
                 <TouchableOpacity
                     style={[styles.tab, tab === 'history' && styles.activeTab]}
                     onPress={() => setTab('history')}
+                    activeOpacity={0.7}
                 >
                     <Text style={[styles.tabText, tab === 'history' && styles.activeTabText]}>
                         History
@@ -143,9 +131,7 @@ const ApprovalsScreen = () => {
                 data={data}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={tab === 'pending' ? renderPendingItem : renderHistoryItem}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(true); }} />
-                }
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(true); }} />}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
@@ -161,28 +147,26 @@ const ApprovalsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.white },
+    container: { flex: 1, backgroundColor: colors.background },
     tabs: {
         flexDirection: 'row',
-        marginHorizontal: spacing.lg,
+        marginHorizontal: spacing.screenPadding,
         marginTop: spacing.md,
-        backgroundColor: colors.background,
-        borderRadius: 12,
+        backgroundColor: colors.glassBg,
+        borderRadius: theme.radius.sm,
         padding: 4,
+        borderWidth: 1,
+        borderColor: colors.glassBorderSubtle,
     },
     tab: {
         flex: 1,
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm + 2,
         alignItems: 'center',
-        borderRadius: 10,
+        borderRadius: theme.radius.xs,
     },
     activeTab: {
         backgroundColor: colors.white,
-        shadowColor: colors.shadow,
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 1,
-        shadowRadius: 3,
-        elevation: 2,
+        ...theme.shadow.sm,
     },
     tabText: {
         fontSize: typography.size.sm,
@@ -194,14 +178,15 @@ const styles = StyleSheet.create({
         color: colors.textPrimary,
         fontWeight: typography.weight.semibold,
     },
-    list: { padding: spacing.lg },
+    list: { padding: spacing.screenPadding },
     card: {
-        backgroundColor: colors.white,
-        borderRadius: 14,
+        backgroundColor: colors.glassBgStrong,
+        borderRadius: theme.radius.md,
         borderWidth: 1,
-        borderColor: colors.border,
-        padding: spacing.base,
+        borderColor: colors.glassBorderSubtle,
+        padding: spacing.md,
         marginBottom: spacing.sm,
+        ...theme.shadow.sm,
     },
     cardHeader: {
         flexDirection: 'row',

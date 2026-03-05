@@ -277,7 +277,7 @@ const EntityDashboard = () => {
             onClick={() => generateEntityDashboardPDF(dashboard, {
               totalStaff, total: totalCerts, valid, expiringSoon, expired
             })}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 hover:bg-blue-600 transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/30 hover:bg-red-700 transition-all active:scale-95"
           >
             <Share2 size={16} />
             <span>Share Report</span>
@@ -334,46 +334,46 @@ const EntityDashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white rounded-[24px] p-5 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-transform group-hover:scale-110">
                     <Users size={20} />
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold mb-1">{totalStaff}</h3>
                 <p className="text-xs text-slate-400 font-medium">Total Staff</p>
-                <div className="absolute bottom-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
+                <div className="absolute bottom-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
               </div>
 
               <div className="bg-white rounded-[24px] p-5 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-transform group-hover:scale-110">
                     <FileText size={20} />
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold mb-1">{staffCertsCount}</h3>
                 <p className="text-xs text-slate-400 font-medium">Staff Certificates</p>
-                <div className="absolute bottom-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
+                <div className="absolute bottom-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
               </div>
 
               <div className="bg-white rounded-[24px] p-5 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-500 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-transform group-hover:scale-110">
                     <Building2 size={20} />
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold mb-1">{entityCertsCount}</h3>
                 <p className="text-xs text-slate-400 font-medium">Entity Certificates</p>
-                <div className="absolute bottom-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
+                <div className="absolute bottom-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
               </div>
 
               <div className="bg-white rounded-[24px] p-5 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-transform group-hover:scale-110">
                     <CheckCircle size={20} />
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold mb-1">{valid}</h3>
                 <p className="text-xs text-slate-400 font-medium">Valid Certificates</p>
-                <div className="absolute bottom-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
+                <div className="absolute bottom-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
               </div>
             </div>
 
@@ -395,17 +395,17 @@ const EntityDashboard = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={certData}>
                       <defs>
-                        <linearGradient id="colorIndigo" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                        <linearGradient id="colorRed" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <Tooltip 
                         contentStyle={{ backgroundColor: "#fff", borderRadius: "12px", border: "none", boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}
-                        itemStyle={{ color: "#6366f1", fontSize: "12px", fontWeight: "bold" }}
-                        cursor={{ stroke: "#6366f1", strokeWidth: 1, strokeDasharray: "4 4" }}
+                        itemStyle={{ color: "#ef4444", fontSize: "12px", fontWeight: "bold" }}
+                        cursor={{ stroke: "#ef4444", strokeWidth: 1, strokeDasharray: "4 4" }}
                       />
-                      <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorIndigo)" />
+                      <Area type="monotone" dataKey="value" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorRed)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -415,7 +415,7 @@ const EntityDashboard = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-bold text-slate-900">Top Staff</h3>
-                    <button className="text-[10px] font-bold text-slate-400 hover:text-slate-900">View All</button>
+                      ,
                   </div>
                   <p className="text-xs text-slate-400 mt-1">By certificate count</p>
                 </div>
@@ -428,7 +428,7 @@ const EntityDashboard = () => {
                         cursor={{ fill: "#f1f5f9" }}
                       />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                      <Bar dataKey="certificates" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={30} />
+                      <Bar dataKey="certificates" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={30} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -444,7 +444,7 @@ const EntityDashboard = () => {
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
                   {isAllGood ? <CheckCircle className="text-white" size={24} /> : <AlertTriangle className="text-white" size={24} />}
                 </div>
-                <MoreHorizontal className="text-white/60 cursor-pointer hover:text-white" />
+
               </div>
 
               <h2 className="text-4xl font-bold mb-2">{issuesCount}</h2>
@@ -467,7 +467,7 @@ const EntityDashboard = () => {
             <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-slate-900 text-sm">Compliance Breakdown</h3>
-                <MoreHorizontal size={16} className="text-slate-300 cursor-pointer" />
+              
               </div>
 
               <div className="space-y-5">
@@ -639,12 +639,7 @@ const EntityDashboard = () => {
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-slate-900">Entity Staff Members</h3>
-            <button
-              onClick={() => navigate(`/staff/new`)}
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-2xl text-sm font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all"
-            >
-              <Plus size={18} /> Add Staff
-            </button>
+            
           </div>
           {entity.staffMembers && entity.staffMembers.length > 0 ? (
             <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">

@@ -1,15 +1,15 @@
-// KIAL AVSEC Mobile - Entity Card Component
+// KIAL AVSEC Mobile — V3 Entity Card
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../theme';
+import theme from '../theme';
 import Badge from './ui/Badge';
 import { isExpired, isExpiringSoon } from '../utils/dateHelpers';
 
 const EntityCard = ({ entity, onPress }) => {
     const staffCount = entity.staffMembers?.length || entity._count?.staffMembers || 0;
 
-    // Contract status
     const getContractBadge = () => {
         if (!entity.contractValidTo) return { label: 'No Contract', variant: 'neutral' };
         if (isExpired(entity.contractValidTo)) return { label: 'Expired', variant: 'danger' };
@@ -27,7 +27,7 @@ const EntityCard = ({ entity, onPress }) => {
         >
             <View style={styles.header}>
                 <View style={styles.iconWrap}>
-                    <Ionicons name="business-outline" size={20} color={colors.red} />
+                    <Ionicons name="business-outline" size={18} color={colors.primary} />
                 </View>
                 <View style={styles.headerText}>
                     <Text style={styles.name} numberOfLines={1}>{entity.name}</Text>
@@ -40,12 +40,12 @@ const EntityCard = ({ entity, onPress }) => {
 
             <View style={styles.footer}>
                 <View style={styles.footerItem}>
-                    <Ionicons name="people-outline" size={14} color={colors.textTertiary} />
+                    <Ionicons name="people-outline" size={13} color={colors.textTertiary} />
                     <Text style={styles.footerText}>{staffCount} staff</Text>
                 </View>
                 {entity.ascoName && (
                     <View style={styles.footerItem}>
-                        <Ionicons name="person-outline" size={14} color={colors.textTertiary} />
+                        <Ionicons name="person-outline" size={13} color={colors.textTertiary} />
                         <Text style={styles.footerText} numberOfLines={1}>{entity.ascoName}</Text>
                     </View>
                 )}
@@ -57,25 +57,26 @@ const EntityCard = ({ entity, onPress }) => {
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: colors.white,
-        borderRadius: 14,
+        backgroundColor: colors.glassBgStrong,
+        borderRadius: theme.radius.md,
         borderWidth: 1,
-        borderColor: colors.border,
-        padding: spacing.base,
+        borderColor: colors.glassBorderSubtle,
+        padding: spacing.md,
         marginBottom: spacing.sm,
+        ...theme.shadow.sm,
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     iconWrap: {
-        width: 40,
-        height: 40,
-        borderRadius: 10,
-        backgroundColor: colors.redLight,
+        width: 38,
+        height: 38,
+        borderRadius: theme.radius.sm,
+        backgroundColor: colors.primaryGlow,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: spacing.md,
+        marginRight: spacing.sm,
     },
     headerText: {
         flex: 1,
@@ -90,17 +91,17 @@ const styles = StyleSheet.create({
     code: {
         fontSize: typography.size.xs,
         color: colors.textTertiary,
-        marginTop: 2,
+        marginTop: 1,
         fontFamily: typography.family,
     },
     footer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: spacing.md,
+        marginTop: spacing.sm,
         paddingTop: spacing.sm,
         borderTopWidth: 1,
         borderTopColor: colors.borderLight,
-        gap: spacing.base,
+        gap: spacing.md,
     },
     footerItem: {
         flexDirection: 'row',

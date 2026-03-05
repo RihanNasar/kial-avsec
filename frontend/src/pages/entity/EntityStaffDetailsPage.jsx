@@ -207,7 +207,7 @@ const EntityStaffDetailsPage = () => {
 
       {/* Staff Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div className="neu-card p-5">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Personal Details</p>
           <div className="space-y-2">
             <div className="flex justify-between">
@@ -225,7 +225,7 @@ const EntityStaffDetailsPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div className="neu-card p-5">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Access Details</p>
           <div className="space-y-2">
             <div className="flex justify-between">
@@ -246,7 +246,7 @@ const EntityStaffDetailsPage = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div className="neu-card p-5">
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Certificate Summary</p>
           <div className="flex gap-3 mt-2">
             <div className="flex-1 text-center p-2 bg-emerald-50 rounded-xl border border-emerald-100">
@@ -266,7 +266,7 @@ const EntityStaffDetailsPage = () => {
       </div>
 
       {/* Certificates Section */}
-      <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-6">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <Shield size={20} className="text-blue-500" />

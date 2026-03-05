@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - Spacing Scale (8pt grid basis)
+// KIAL AVSEC Mobile — Spacing Scale (V3 — 8pt grid)
 export default {
     xxs: 4,
     xs: 8,
@@ -12,7 +12,10 @@ export default {
     huge: 64,
     massive: 80,
 
-    // Layout specific
+    // Layout-specific
     screenPadding: 24,
     cardPadding: 20,
+    sectionGap: 28,   // Vertical gap between major sections
+    bentoGap: 12,      // Gap between bento grid items
+    thumbZone: 88,     // Bottom safe area for thumb-reach actions
 };

@@ -140,7 +140,7 @@ const ImportDataPage = () => {
         </div>
 
         {/* File Format Badge */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-2">
+        <div className="bg-white px-4 py-2.5 rounded-2xl flex items-center gap-2">
           <FileSpreadsheet size={16} className="text-emerald-500" />
           <span className="text-xs font-bold text-slate-600">Supported:</span>
           <span className="text-xs font-bold text-slate-900">.xlsx, .xls</span>
@@ -151,7 +151,7 @@ const ImportDataPage = () => {
       {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
 
       {/* Import Type Selection */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-8">
         <h2 className="font-bold text-slate-900 text-lg mb-6">Select Import Type</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -188,7 +188,7 @@ const ImportDataPage = () => {
       </div>
 
       {/* Upload Form */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-8">
         <h2 className="font-bold text-slate-900 text-lg mb-6">Upload File</h2>
 
         <form onSubmit={handleImport} className="space-y-6">
@@ -302,7 +302,7 @@ const ImportDataPage = () => {
       </div>
 
       {/* Excel Format Guidelines */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-8">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center">
             <Info size={20} />

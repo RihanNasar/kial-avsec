@@ -15,6 +15,9 @@ const approvalRoutes = require("./routes/approvalRoutes");
 
 const app = express();
 
+// Trust proxy headers from ngrok/reverse proxies (required for express-rate-limit)
+app.set('trust proxy', 1);
+
 // Rate Limiting Configuration
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

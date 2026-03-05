@@ -78,7 +78,7 @@ const CSODashboard = () => {
         <div className="flex items-center gap-3">
           <button
             onClick={() => generateDashboardPDF(stats)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 transition-all active:scale-95"
+            className="flex items-center gap-2 px-4 py-2.5 bg-red-50/80 backdrop-blur-md text-red-600 border border-red-200/60 rounded-xl text-sm font-bold shadow-sm hover:bg-red-100/70 transition-all active:scale-95"
           >
             <Share2 size={16} />
             <span>Share Report</span>
@@ -94,13 +94,10 @@ const CSODashboard = () => {
             {/* Stat 1: Entities */}
             <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center transition-transform group-hover:scale-110">
+                <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-transform group-hover:scale-110">
                   <Building2 size={20} />
                 </div>
-                <MoreHorizontal
-                  size={20}
-                  className="text-slate-300 cursor-pointer hover:text-slate-500"
-                />
+                
               </div>
               <h3 className="text-2xl font-bold mb-1">
                 {stats?.totals?.entities || 0}
@@ -108,37 +105,31 @@ const CSODashboard = () => {
               <p className="text-xs text-slate-400 font-medium">
                 Active Entities
               </p>
-              <div className="absolute bottom-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
+              <div className="absolute bottom-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
             </div>
 
             {/* Stat 2: Staff */}
             <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center transition-transform group-hover:scale-110">
+                <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-transform group-hover:scale-110">
                   <Users size={20} />
                 </div>
-                <MoreHorizontal
-                  size={20}
-                  className="text-slate-300 cursor-pointer hover:text-slate-500"
-                />
+                
               </div>
               <h3 className="text-2xl font-bold mb-1">
                 {stats?.totals?.staff || 0}
               </h3>
               <p className="text-xs text-slate-400 font-medium">Total Staff</p>
-              <div className="absolute bottom-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
+              <div className="absolute bottom-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
             </div>
 
             {/* Stat 3: Pending Approvals */}
             <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center transition-transform group-hover:scale-110">
+                <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center transition-transform group-hover:scale-110">
                   <CheckCircle size={20} />
                 </div>
-                <MoreHorizontal
-                  size={20}
-                  className="text-slate-300 cursor-pointer hover:text-slate-500"
-                />
+                
               </div>
               <h3 className="text-2xl font-bold mb-1">
                 {stats?.pendingApprovals || 0}
@@ -146,7 +137,7 @@ const CSODashboard = () => {
               <p className="text-xs text-slate-400 font-medium">
                 Pending Approvals
               </p>
-              <div className="absolute bottom-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
+              <div className="absolute bottom-0 right-0 w-24 h-24 bg-red-500/5 rounded-full blur-2xl transform translate-x-8 translate-y-8" />
             </div>
           </div>
 
@@ -278,9 +269,7 @@ const CSODashboard = () => {
                   </p>
                 </div>
               </div>
-              <button className="text-xs font-bold text-slate-400 hover:text-slate-900 transition-colors">
-                View All
-              </button>
+              
             </div>
 
             <div className="space-y-4">
@@ -341,34 +330,41 @@ const CSODashboard = () => {
 
         {/* RIGHT COLUMN (Narrow Sidebar) */}
         <div className="space-y-6">
-          {/* 1. "Gold Card" - Critical Insights */}
-          <div className="bg-[#F59E0B] rounded-[32px] p-8 text-white relative overflow-hidden shadow-lg shadow-orange-500/20 h-[380px] flex flex-col">
+          {/* 1. Critical Insights Card - Red Glassmorphism */}
+          <div className="relative flex flex-col h-[380px] p-8 overflow-hidden rounded-[32px] bg-gradient-to-br from-red-400/[0.07] to-rose-400/[0.04] backdrop-blur-xl border border-red-300/15 shadow-lg shadow-red-100/20">
+            
             {/* Background Decor */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl transform translate-x-10 -translate-y-10" />
+            <div className="absolute top-[-10%] right-[-10%] w-48 h-48 bg-red-300/15 rounded-full blur-[50px] pointer-events-none" />
+            <div className="absolute bottom-[-10%] left-[-10%] w-40 h-40 bg-rose-300/10 rounded-full blur-[50px] pointer-events-none" />
 
+            {/* Icon Container */}
             <div className="flex justify-between items-start mb-6 z-10">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center">
-                <AlertTriangle className="text-white" size={24} />
+              <div className="w-12 h-12 bg-white/50 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-red-100/40 shadow-sm">
+                <AlertTriangle className="text-red-500" size={24} />
               </div>
-              <MoreHorizontal className="text-white/60 cursor-pointer hover:text-white" />
             </div>
 
-            <h2 className="text-4xl font-bold mb-2">
+            {/* Main Stats */}
+            <h2 className="text-4xl font-bold mb-1 z-10 text-slate-800 tracking-tight">
               {stats?.compliance?.expiringSoon || 0}
             </h2>
-            <p className="text-sm font-medium text-orange-50 mb-8 opacity-90">
+            <p className="text-xs font-semibold text-red-500/80 mb-8 z-10 uppercase tracking-wider">
               Certificates Expiring Soon
             </p>
 
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 mt-auto border border-white/10">
+            {/* Bottom Alert Box */}
+            <div className="bg-white/35 backdrop-blur-sm rounded-2xl p-4 mt-auto border border-red-100/30 z-10">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-                <span className="text-xs font-bold text-white">
+                <div className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-60"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                </div>
+                <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest">
                   Critical Action
                 </span>
               </div>
-              <p className="text-[10px] text-orange-50 leading-relaxed opacity-80">
-                {stats?.compliance?.expired || 0} certificates have already
+              <p className="text-[11px] font-medium text-slate-600 leading-relaxed">
+                <span className="text-red-600 font-semibold">{stats?.compliance?.expired || 0}</span> certificates have already
                 expired. Immediate renewal required.
               </p>
             </div>
@@ -378,10 +374,7 @@ const CSODashboard = () => {
           <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 flex flex-col flex-grow">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-900 text-sm">Entity Issues</h3>
-              <MoreHorizontal
-                size={16}
-                className="text-slate-300 cursor-pointer hover:text-slate-500"
-              />
+              
             </div>
 
             <div className="space-y-3 overflow-y-auto pr-1 pb-2 flex-grow">

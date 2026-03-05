@@ -64,7 +64,22 @@ exports.reviewApprovalRequest = async (req, res, next) => {
         else if (action === "UPDATE") {
           // Merge payload into existing record
           if(payload) {
-             let updateData = typeof payload === 'string' ? JSON.parse(payload) : payload;
+             let updateData = typeof payload === 'string' ? JSON.parse(payload) : { ...payload };
+             
+             // Remove non-database fields from update payload
+             delete updateData.isRenewal;
+             delete updateData.status;
+
+             // Convert date strings to Date objects for Prisma
+             const dateFields = ['validFrom', 'validTo', 'proposedValidTo'];
+             for (const field of dateFields) {
+               if (updateData[field] && typeof updateData[field] === 'string') {
+                 updateData[field] = new Date(updateData[field]);
+               }
+             }
+
+             // Also set status to APPROVED since the record was previously set to PENDING
+             updateData.status = "APPROVED";
              
              // Special case for Staff: email belongs to the User table
              if (entityType === "Staff" && updateData.email !== undefined) {

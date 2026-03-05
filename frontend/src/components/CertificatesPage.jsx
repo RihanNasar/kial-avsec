@@ -213,7 +213,7 @@ const CertificatesPage = ({
       )}
 
       {/* 2. Search Bar */}
-      <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-6">
         <div className="relative max-w-lg">
           <Search
             className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
@@ -230,7 +230,7 @@ const CertificatesPage = ({
       </div>
 
       {/* 3. Certificates Table */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 min-h-[400px]">
+      <div className="neu-card-lg p-8 min-h-[400px]">
         {filteredCertificates.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[300px] text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">

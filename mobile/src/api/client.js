@@ -5,13 +5,15 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
 // Default to localhost; change in .env or set at runtime
-const API_BASE_URL = 'http://10.156.232.223:5000/api';
+// 🔧 DEV: paste your `ngrok http 5000` URL here when developing over tunnel
+const API_BASE_URL = 'https://bf38-103-175-88-33.ngrok-free.app/api';
 
 const client = axios.create({
     baseURL: API_BASE_URL,
     timeout: 15000,
     headers: {
         'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
     },
 });
 

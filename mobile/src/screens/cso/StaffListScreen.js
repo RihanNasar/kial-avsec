@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - CSO Staff List Screen
+// KIAL AVSEC Mobile — V3 CSO Staff List
 import React, { useState, useCallback } from 'react';
 import { View, FlatList, TextInput, StyleSheet, RefreshControl, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import StaffCard from '../../components/StaffCard';
 import LoadingOverlay from '../../components/ui/LoadingOverlay';
 import EmptyState from '../../components/ui/EmptyState';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 
 const StaffListScreen = ({ navigation }) => {
     const [staff, setStaff] = useState([]);
@@ -28,16 +29,7 @@ const StaffListScreen = ({ navigation }) => {
         }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchStaff();
-        }, [])
-    );
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchStaff(true);
-    };
+    useFocusEffect(useCallback(() => { fetchStaff(); }, []));
 
     const filtered = staff.filter((s) =>
         s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
@@ -58,32 +50,20 @@ const StaffListScreen = ({ navigation }) => {
                     placeholderTextColor={colors.textTertiary}
                     style={styles.searchInput}
                 />
-                {search ? (
-                    <Ionicons name="close-circle" size={18} color={colors.textTertiary} onPress={() => setSearch('')} />
-                ) : null}
+                {search ? <Ionicons name="close-circle" size={18} color={colors.textTertiary} onPress={() => setSearch('')} /> : null}
             </View>
 
             <FlatList
                 data={filtered}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({ item }) => (
-                    <StaffCard
-                        staff={item}
-                        showEntity
-                        onPress={() => navigation.navigate('StaffDetail', { staffId: item.id })}
-                    />
+                    <StaffCard staff={item} showEntity onPress={() => navigation.navigate('StaffDetail', { staffId: item.id })} />
                 )}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
-                }
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchStaff(true); }} tintColor={colors.primary} />}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
-                    <EmptyState
-                        icon="people-outline"
-                        title="No staff found"
-                        message={search ? 'Try a different search term' : 'No staff members have been added yet'}
-                    />
+                    <EmptyState icon="people-outline" title="No staff found" message={search ? 'Try a different search term' : 'No staff members have been added yet'} />
                 }
             />
         </View>
@@ -91,19 +71,19 @@ const StaffListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.white },
+    container: { flex: 1, backgroundColor: colors.background },
     searchWrap: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.background,
-        marginHorizontal: spacing.lg,
+        backgroundColor: colors.glassBg,
+        marginHorizontal: spacing.screenPadding,
         marginTop: spacing.md,
         marginBottom: spacing.sm,
-        borderRadius: 12,
+        borderRadius: theme.radius.sm,
         paddingHorizontal: spacing.md,
-        paddingVertical: Platform.OS === 'ios' ? spacing.md : 0,
+        paddingVertical: Platform.OS === 'ios' ? spacing.sm : 0,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.glassBorderSubtle,
     },
     searchInput: {
         flex: 1,
@@ -111,9 +91,9 @@ const styles = StyleSheet.create({
         fontSize: typography.size.base,
         color: colors.textPrimary,
         fontFamily: typography.family,
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm + 2,
     },
-    list: { padding: spacing.lg },
+    list: { padding: spacing.screenPadding },
 });
 
 export default StaffListScreen;

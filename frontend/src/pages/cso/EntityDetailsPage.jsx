@@ -313,7 +313,7 @@ const EntityDetailsPage = () => {
 
       {/* 2. Live Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group">
+        <div className="neu-card-lg p-6 relative overflow-hidden group">
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
               <Users size={20} />
@@ -327,7 +327,7 @@ const EntityDetailsPage = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group">
+        <div className="neu-card-lg p-6 relative overflow-hidden group">
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
               <Shield size={20} />
@@ -341,7 +341,7 @@ const EntityDetailsPage = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 relative overflow-hidden group">
+        <div className="neu-card-lg p-6 relative overflow-hidden group">
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
               <FileText size={20} />
@@ -427,7 +427,7 @@ const EntityDetailsPage = () => {
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Left Panel: Entity Information */}
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 h-full">
+          <div className="neu-card-lg p-8 h-full">
             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
               <Building2 size={20} className="text-blue-600" />
               Entity Information
@@ -508,7 +508,7 @@ const EntityDetailsPage = () => {
           {/* Right Panel: Contact & Compliance */}
           <div className="space-y-6">
             {/* Contact Details */}
-            <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+            <div className="neu-card-lg p-8">
               <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                 <Phone size={20} className="text-emerald-600" />
                 Contact Details
@@ -516,7 +516,7 @@ const EntityDetailsPage = () => {
 
               <div className="space-y-4">
                 {/* ASCO */}
-                <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                <div className="bg-white p-4 rounded-2xl">
                   <p className="text-[10px] font-bold text-slate-400 uppercase mb-2">
                     ASCO (Security Officer)
                   </p>
@@ -564,7 +564,7 @@ const EntityDetailsPage = () => {
             </div>
 
             {/* Combined Compliance Stats */}
-            <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+            <div className="neu-card-lg p-8">
               <h3 className="text-lg font-bold text-slate-900 mb-4">
                 Certificate Health
               </h3>
@@ -593,7 +593,7 @@ const EntityDetailsPage = () => {
 
       {/* --- ENTITY CERTIFICATES TAB --- */}
       {activeTab === "entity-certs" && (
-        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 min-h-[400px] animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="neu-card-lg p-8 min-h-[400px] animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-lg font-bold text-slate-900">
               Entity Certificates
@@ -696,7 +696,7 @@ const EntityDetailsPage = () => {
             </button>
           </div>
           {entity.staffMembers && entity.staffMembers.length > 0 ? (
-            <div className="bg-white rounded-[32px] shadow-sm border border-slate-100 overflow-hidden">
+            <div className="neu-card-lg overflow-hidden">
               <div className="divide-y divide-slate-50">
                 {entity.staffMembers.map((staff) => {
                   const certs = staff.certificates || [];
@@ -788,7 +788,7 @@ const EntityDetailsPage = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-[32px] p-12 text-center shadow-sm border border-slate-100">
+            <div className="neu-card-lg p-12 text-center">
               <Users size={48} className="mx-auto text-slate-300 mb-4" />
               <h3 className="text-lg font-bold text-slate-900">
                 No Staff Members

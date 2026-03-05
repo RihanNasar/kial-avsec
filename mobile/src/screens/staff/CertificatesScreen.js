@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - Staff Certificates Screen
+// KIAL AVSEC Mobile — V3 Staff Certificates Screen
 import React, { useState, useCallback } from 'react';
 import { View, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -48,8 +48,8 @@ const CertificatesScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.white },
-    list: { padding: spacing.lg },
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { padding: spacing.screenPadding },
 });
 
 export default CertificatesScreen;

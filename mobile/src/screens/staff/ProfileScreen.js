@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - Staff Profile Screen
+// KIAL AVSEC Mobile — V3 Staff Profile Screen
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, RefreshControl, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
 import CertificateCard from '../../components/CertificateCard';
 import { colors, spacing, typography } from '../../theme';
-import { getRoleShortLabel } from '../../constants/roles';
+import theme from '../../theme';
 
 const ProfileScreen = () => {
     const { user, logout } = useAuth();
@@ -55,9 +55,11 @@ const ProfileScreen = () => {
             <View style={styles.profileHeader}>
                 <View style={styles.headerTop}>
                     <View style={[styles.avatar, p.isKialStaff && styles.avatarKial]}>
-                        <Text style={styles.avatarText}>{p.fullName?.charAt(0)?.toUpperCase() || 'S'}</Text>
+                        <Text style={[styles.avatarText, p.isKialStaff && styles.avatarTextKial]}>
+                            {p.fullName?.charAt(0)?.toUpperCase() || 'S'}
+                        </Text>
                     </View>
-                    <TouchableOpacity onPress={logout} style={styles.logoutBtn}>
+                    <TouchableOpacity onPress={logout} style={styles.logoutBtn} activeOpacity={0.7}>
                         <Ionicons name="log-out-outline" size={20} color={colors.textSecondary} />
                     </TouchableOpacity>
                 </View>
@@ -70,7 +72,10 @@ const ProfileScreen = () => {
             </View>
 
             {/* Details */}
-            <Text style={styles.sectionTitle}>Personal Information</Text>
+            <View style={styles.sectionHeader}>
+                <View style={styles.sectionAccent} />
+                <Text style={styles.sectionTitle}>Personal Information</Text>
+            </View>
             <Card>
                 <InfoRow label="Employee Code" value={p.empCode} />
                 <InfoRow label="Entity" value={p.entity?.name} />
@@ -84,7 +89,10 @@ const ProfileScreen = () => {
             {/* Certificates Summary */}
             {p.certificates?.length > 0 && (
                 <>
-                    <Text style={styles.sectionTitle}>My Certificates ({p.certificates.length})</Text>
+                    <View style={styles.sectionHeader}>
+                        <View style={styles.sectionAccent} />
+                        <Text style={styles.sectionTitle}>My Certificates ({p.certificates.length})</Text>
+                    </View>
                     {p.certificates.slice(0, 3).map((cert) => (
                         <CertificateCard key={cert.id} certificate={cert} />
                     ))}
@@ -97,21 +105,103 @@ const ProfileScreen = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.white },
-    content: { padding: spacing.lg },
-    profileHeader: { paddingBottom: spacing.lg, borderBottomWidth: 1, borderBottomColor: colors.borderLight, marginBottom: spacing.md },
-    headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.md },
-    avatar: { width: 64, height: 64, borderRadius: 18, backgroundColor: colors.borderLight, justifyContent: 'center', alignItems: 'center' },
-    avatarKial: { backgroundColor: colors.redLight },
-    avatarText: { fontSize: typography.size.xxl, fontWeight: typography.weight.bold, color: colors.textPrimary, fontFamily: typography.family },
-    logoutBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.borderLight, justifyContent: 'center', alignItems: 'center' },
-    name: { fontSize: typography.size.xl, fontWeight: typography.weight.bold, color: colors.textPrimary, fontFamily: typography.family },
-    designation: { fontSize: typography.size.sm, color: colors.textSecondary, fontFamily: typography.family, marginTop: 4 },
-    badges: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.md },
-    sectionTitle: { fontSize: typography.size.md, fontWeight: typography.weight.bold, color: colors.textPrimary, fontFamily: typography.family, marginTop: spacing.lg, marginBottom: spacing.md },
-    infoRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.sm, borderBottomWidth: 1, borderBottomColor: colors.borderLight },
-    infoLabel: { fontSize: typography.size.sm, color: colors.textSecondary, fontFamily: typography.family, flex: 1 },
-    infoValue: { fontSize: typography.size.sm, fontWeight: typography.weight.medium, color: colors.textPrimary, fontFamily: typography.family, flex: 1, textAlign: 'right' },
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.screenPadding },
+    profileHeader: {
+        paddingBottom: spacing.lg,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+        marginBottom: spacing.md,
+    },
+    headerTop: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: spacing.md,
+    },
+    avatar: {
+        width: 64,
+        height: 64,
+        borderRadius: theme.radius.lg,
+        backgroundColor: colors.surfaceDim,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarKial: { backgroundColor: colors.primaryGlow },
+    avatarText: {
+        fontSize: typography.size.xxl,
+        fontWeight: typography.weight.bold,
+        color: colors.textSecondary,
+        fontFamily: typography.family,
+    },
+    avatarTextKial: { color: colors.primary },
+    logoutBtn: {
+        width: 40,
+        height: 40,
+        borderRadius: theme.radius.sm,
+        backgroundColor: colors.glassBg,
+        borderWidth: 1,
+        borderColor: colors.glassBorderSubtle,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    name: {
+        fontSize: typography.size.xl,
+        fontWeight: typography.weight.bold,
+        color: colors.textPrimary,
+        fontFamily: typography.family,
+    },
+    designation: {
+        fontSize: typography.size.sm,
+        color: colors.textSecondary,
+        fontFamily: typography.family,
+        marginTop: 4,
+    },
+    badges: {
+        flexDirection: 'row',
+        gap: spacing.sm,
+        marginTop: spacing.md,
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: spacing.sectionGap,
+        marginBottom: spacing.md,
+    },
+    sectionAccent: {
+        width: 3,
+        height: 18,
+        backgroundColor: colors.primary,
+        borderRadius: 2,
+        marginRight: spacing.sm,
+    },
+    sectionTitle: {
+        fontSize: typography.size.md,
+        fontWeight: typography.weight.bold,
+        color: colors.textPrimary,
+        fontFamily: typography.family,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: spacing.sm,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.borderLight,
+    },
+    infoLabel: {
+        fontSize: typography.size.sm,
+        color: colors.textSecondary,
+        fontFamily: typography.family,
+        flex: 1,
+    },
+    infoValue: {
+        fontSize: typography.size.sm,
+        fontWeight: typography.weight.medium,
+        color: colors.textPrimary,
+        fontFamily: typography.family,
+        flex: 1,
+        textAlign: 'right',
+    },
 });
 
 export default ProfileScreen;

@@ -328,7 +328,7 @@ const StaffDetailsPage = () => {
 
       {/* 2. Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+        <div className="neu-card-lg p-6">
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center">
               <CheckCircle size={20} />
@@ -342,7 +342,7 @@ const StaffDetailsPage = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+        <div className="neu-card-lg p-6">
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center">
               <Calendar size={20} />
@@ -356,7 +356,7 @@ const StaffDetailsPage = () => {
           </p>
         </div>
 
-        <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100">
+        <div className="neu-card-lg p-6">
           <div className="flex justify-between items-start mb-4">
             <div className="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center">
               <AlertTriangle size={20} />
@@ -434,7 +434,7 @@ const StaffDetailsPage = () => {
       {activeTab === "overview" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Left Panel: Personal Information */}
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 h-full">
+          <div className="neu-card-lg p-8 h-full">
             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
               <User size={20} className="text-blue-600" />
               Personal Information
@@ -571,7 +571,7 @@ const StaffDetailsPage = () => {
           </div>
 
           {/* Right Panel: AEP Details */}
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 h-full">
+          <div className="neu-card-lg p-8 h-full">
             <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
               <CreditCard size={20} className="text-emerald-600" />
               AEP Details
@@ -632,7 +632,7 @@ const StaffDetailsPage = () => {
       {/* --- CERTIFICATES TAB --- */}
       {activeTab === "certificates" && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+          <div className="neu-card-lg p-8">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <BadgeCheck size={20} className="text-blue-600" />
@@ -659,7 +659,7 @@ const StaffDetailsPage = () => {
                     >
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex items-center gap-3">
-                          <div className="p-2.5 bg-white rounded-xl border border-slate-200 text-blue-600">
+                          <div className="p-2.5 neu-card border border-slate-200 text-blue-600">
                             <FileText size={20} />
                           </div>
                           <div>

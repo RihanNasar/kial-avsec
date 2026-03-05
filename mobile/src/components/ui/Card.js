@@ -1,7 +1,8 @@
-// KIAL AVSEC Mobile - Card Component
+// KIAL AVSEC Mobile — V3 Glassmorphic Card
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors, spacing } from '../../theme';
+import theme from '../../theme';
 
 const Card = ({ children, onPress, style, padded = true }) => {
     const Container = onPress ? TouchableOpacity : View;
@@ -12,6 +13,7 @@ const Card = ({ children, onPress, style, padded = true }) => {
             activeOpacity={onPress ? 0.7 : 1}
             style={[
                 styles.card,
+                theme.shadow.sm,
                 padded && styles.padded,
                 style,
             ]}
@@ -23,13 +25,13 @@ const Card = ({ children, onPress, style, padded = true }) => {
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: colors.white,
-        borderRadius: 16,
+        backgroundColor: colors.glassBgStrong,
+        borderRadius: theme.radius.lg,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.glassBorderSubtle,
     },
     padded: {
-        padding: spacing.base,
+        padding: spacing.cardPadding,
     },
 });
 

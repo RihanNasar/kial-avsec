@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - CSO Entity Detail Screen
+// KIAL AVSEC Mobile — V3 CSO Entity Detail
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, RefreshControl, StyleSheet, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -7,9 +7,11 @@ import adminApi from '../../api/adminApi';
 import LoadingOverlay from '../../components/ui/LoadingOverlay';
 import Card from '../../components/ui/Card';
 import Badge from '../../components/ui/Badge';
+import GlassCard from '../../components/ui/GlassCard';
 import CertificateCard from '../../components/CertificateCard';
 import StaffCard from '../../components/StaffCard';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 import { formatDate, isExpired, isExpiringSoon } from '../../utils/dateHelpers';
 
 const EntityDetailScreen = ({ route, navigation }) => {
@@ -32,16 +34,7 @@ const EntityDetailScreen = ({ route, navigation }) => {
         }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchEntity();
-        }, [entityId])
-    );
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchEntity(true);
-    };
+    useFocusEffect(useCallback(() => { fetchEntity(); }, [entityId]));
 
     if (loading && !entity) return <LoadingOverlay />;
     if (!entity) return null;
@@ -59,14 +52,14 @@ const EntityDetailScreen = ({ route, navigation }) => {
         <ScrollView
             style={styles.container}
             contentContainerStyle={styles.content}
-            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchEntity(true); }} />}
             showsVerticalScrollIndicator={false}
         >
             {/* Entity Header */}
-            <View style={styles.headerCard}>
+            <GlassCard borderRadius={theme.radius.xl} variant="elevated">
                 <View style={styles.headerTop}>
                     <View style={styles.entityIcon}>
-                        <Ionicons name="business" size={28} color={colors.red} />
+                        <Ionicons name="business" size={24} color={colors.primary} />
                     </View>
                     <View style={styles.headerInfo}>
                         <Text style={styles.entityName}>{entity.name}</Text>
@@ -83,19 +76,21 @@ const EntityDetailScreen = ({ route, navigation }) => {
                         <Text style={styles.detailValue}>{entity.category}</Text>
                     </View>
                 )}
-
                 <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Contract</Text>
                     <Text style={styles.detailValue}>
                         {formatDate(entity.contractValidFrom)} — {formatDate(entity.contractValidTo)}
                     </Text>
                 </View>
-            </View>
+            </GlassCard>
 
             {/* ASCO Info */}
             {(entity.ascoName || entity.ascoEmail) && (
                 <>
-                    <Text style={styles.sectionTitle}>ASCO Contact</Text>
+                    <View style={styles.sectionHeader}>
+                        <View style={styles.sectionAccent} />
+                        <Text style={styles.sectionTitle}>ASCO Contact</Text>
+                    </View>
                     <Card>
                         <View style={styles.ascoRow}>
                             <View style={styles.ascoAvatar}>
@@ -111,26 +106,28 @@ const EntityDetailScreen = ({ route, navigation }) => {
                 </>
             )}
 
-            {/* Entity Certificates */}
+            {/* Certificates */}
             {entity.certificates?.length > 0 && (
                 <>
-                    <Text style={styles.sectionTitle}>Entity Certificates ({entity.certificates.length})</Text>
+                    <View style={styles.sectionHeader}>
+                        <View style={styles.sectionAccent} />
+                        <Text style={styles.sectionTitle}>Entity Certificates ({entity.certificates.length})</Text>
+                    </View>
                     {entity.certificates.map((cert) => (
                         <CertificateCard key={cert.id} certificate={cert} />
                     ))}
                 </>
             )}
 
-            {/* Staff Members */}
+            {/* Staff */}
             {entity.staffMembers?.length > 0 && (
                 <>
-                    <Text style={styles.sectionTitle}>Staff Members ({entity.staffMembers.length})</Text>
+                    <View style={styles.sectionHeader}>
+                        <View style={styles.sectionAccent} />
+                        <Text style={styles.sectionTitle}>Staff Members ({entity.staffMembers.length})</Text>
+                    </View>
                     {entity.staffMembers.map((staff) => (
-                        <StaffCard
-                            key={staff.id}
-                            staff={staff}
-                            onPress={() => navigation.navigate('StaffDetail', { staffId: staff.id })}
-                        />
+                        <StaffCard key={staff.id} staff={staff} onPress={() => navigation.navigate('StaffDetail', { staffId: staff.id })} />
                     ))}
                 </>
             )}
@@ -141,26 +138,18 @@ const EntityDetailScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.white },
-    content: { padding: spacing.lg },
-    headerCard: {
-        backgroundColor: colors.white,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-        padding: spacing.lg,
-        marginBottom: spacing.md,
-    },
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: spacing.screenPadding },
     headerTop: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: spacing.base,
+        marginBottom: spacing.md,
     },
     entityIcon: {
-        width: 52,
-        height: 52,
-        borderRadius: 14,
-        backgroundColor: colors.redLight,
+        width: 48,
+        height: 48,
+        borderRadius: theme.radius.md,
+        backgroundColor: colors.primaryGlow,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,
@@ -196,20 +185,31 @@ const styles = StyleSheet.create({
         color: colors.textPrimary,
         fontFamily: typography.family,
     },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: spacing.sectionGap,
+        marginBottom: spacing.md,
+    },
+    sectionAccent: {
+        width: 3,
+        height: 18,
+        backgroundColor: colors.primary,
+        borderRadius: 2,
+        marginRight: spacing.sm,
+    },
     sectionTitle: {
         fontSize: typography.size.md,
         fontWeight: typography.weight.bold,
         color: colors.textPrimary,
         fontFamily: typography.family,
-        marginTop: spacing.lg,
-        marginBottom: spacing.md,
     },
     ascoRow: { flexDirection: 'row', alignItems: 'center' },
     ascoAvatar: {
         width: 44,
         height: 44,
-        borderRadius: 12,
-        backgroundColor: colors.accentLight,
+        borderRadius: theme.radius.sm,
+        backgroundColor: colors.accentSoft,
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: spacing.md,

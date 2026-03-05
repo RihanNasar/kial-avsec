@@ -19,7 +19,7 @@ const DocumentPreview = ({ url, onClose }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden shadow-2xl"
+        className="neu-card w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -39,7 +39,7 @@ const DocumentPreview = ({ url, onClose }) => {
               download
               target="_blank"
               rel="noreferrer"
-              className="text-[11px] font-bold text-slate-500 hover:text-slate-700 px-3 py-1.5 bg-white rounded-lg hover:bg-slate-100 transition-colors border border-slate-200 flex items-center gap-1.5"
+              className="text-[11px] font-bold text-slate-500 hover:text-slate-700 px-3 py-1.5 neu-card-flat hover:bg-slate-100 transition-colors border border-slate-200 flex items-center gap-1.5"
               onClick={(e) => e.stopPropagation()}
             >
               <Download size={13} /> Download

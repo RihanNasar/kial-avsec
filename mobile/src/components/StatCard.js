@@ -1,23 +1,22 @@
-// KIAL AVSEC Mobile - V2 Neumorphic Stat Card
+// KIAL AVSEC Mobile — V3 Bento-Style Stat Card
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, typography } from '../theme';
-import NeumorphicView from './ui/NeumorphicView';
+import theme from '../theme';
+import GlassCard from './ui/GlassCard';
 
 const StatCard = ({ title, value, icon, iconColor = colors.accent, subtitle, style }) => (
-    <NeumorphicView borderRadius={24} style={[styles.cardWrapper, style]}>
+    <GlassCard borderRadius={theme.radius.xl} style={[styles.cardWrapper, style]} noPadding>
         <View style={styles.cardInner}>
-            <View style={styles.headerRow}>
-                <View style={[styles.iconWrap, { backgroundColor: iconColor + '15' }]}>
-                    <Ionicons name={icon} size={22} color={iconColor} />
-                </View>
+            <View style={[styles.iconWrap, { backgroundColor: iconColor + '0D' }]}>
+                <Ionicons name={icon} size={20} color={iconColor} />
             </View>
             <Text style={styles.value}>{value ?? '—'}</Text>
             <Text style={styles.title} numberOfLines={1}>{title}</Text>
             {subtitle && <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>}
         </View>
-    </NeumorphicView>
+    </GlassCard>
 );
 
 const styles = StyleSheet.create({
@@ -26,23 +25,19 @@ const styles = StyleSheet.create({
         minWidth: 140,
     },
     cardInner: {
-        padding: spacing.lg,
-        paddingTop: spacing.xl,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        marginBottom: spacing.sm,
+        padding: spacing.base,
+        paddingTop: spacing.lg,
     },
     iconWrap: {
-        width: 48,
-        height: 48,
-        borderRadius: 16,
+        width: 40,
+        height: 40,
+        borderRadius: theme.radius.sm,
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: spacing.sm,
     },
     value: {
-        fontSize: typography.size.display,
+        fontSize: typography.size.xxxl,
         fontWeight: typography.weight.black,
         color: colors.textPrimary,
         fontFamily: typography.family,
@@ -50,16 +45,16 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
     title: {
-        fontSize: typography.size.sm,
-        fontWeight: typography.weight.bold,
+        fontSize: typography.size.xs,
+        fontWeight: typography.weight.semibold,
         color: colors.textSecondary,
         fontFamily: typography.family,
         letterSpacing: 0.2,
     },
     subtitle: {
-        fontSize: typography.size.xs,
+        fontSize: typography.size.xxs,
         color: colors.textTertiary,
-        marginTop: 4,
+        marginTop: 3,
         fontFamily: typography.family,
         fontWeight: typography.weight.medium,
     },

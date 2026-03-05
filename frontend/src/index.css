@@ -27,3 +27,12 @@
     @apply bg-white/80 text-slate-700 px-6 py-2 rounded-lg hover:bg-white border border-slate-200 transition-all shadow-sm;
   }
 }
+
+/* Sidebar scrollbar hiding - cross-browser */
+.sidebar-no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.sidebar-no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

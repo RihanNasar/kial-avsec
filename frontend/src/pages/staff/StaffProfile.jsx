@@ -73,7 +73,7 @@ const StaffProfile = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Identity Card */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-2xl p-8 border border-slate-200 flex flex-col items-center text-center shadow-sm">
+          <div className="neu-card p-8 border border-slate-200 flex flex-col items-center text-center shadow-sm">
              <div className="w-24 h-24 rounded-full border border-slate-200 p-1 mb-6">
                <div className="w-full h-full rounded-full bg-slate-50 flex items-center justify-center">
                   <User size={32} className="text-slate-400" />
@@ -138,7 +138,7 @@ const StaffProfile = () => {
 
         {/* Right Column: Edit Form */}
         <div className="lg:col-span-8">
-          <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm h-full">
+          <div className="neu-card p-8 h-full">
             <div className="flex items-center gap-3 mb-8 border-b border-slate-100 pb-6">
                <Briefcase size={20} className="text-slate-400" />
                <div>

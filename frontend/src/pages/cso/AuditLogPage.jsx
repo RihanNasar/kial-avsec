@@ -180,7 +180,7 @@ const AuditLogPage = () => {
         </div>
 
         <div className="flex gap-3">
-          <div className="bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+          <div className="bg-white px-4 py-2 rounded-2xl flex items-center gap-3">
             <div className="p-1.5 bg-blue-50 text-blue-600 rounded-lg">
               <Activity size={16} />
             </div>
@@ -193,7 +193,7 @@ const AuditLogPage = () => {
               </p>
             </div>
           </div>
-          <div className="bg-white px-4 py-2 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+          <div className="bg-white px-4 py-2 rounded-2xl flex items-center gap-3">
             <div className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg">
               <User size={16} />
             </div>
@@ -214,7 +214,7 @@ const AuditLogPage = () => {
       )}
 
       {/* 2. Filter Bar */}
-      <div className="bg-white rounded-[32px] p-6 shadow-sm border border-slate-100 transition-all duration-300">
+      <div className="neu-card-lg p-6 transition-all duration-300">
         <div className="flex flex-col gap-4">
           {/* Main Search Row */}
           <div className="flex flex-col md:flex-row gap-4">
@@ -302,7 +302,7 @@ const AuditLogPage = () => {
       </div>
 
       {/* 3. Logs List (Modern Table) */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 min-h-[400px]">
+      <div className="neu-card-lg p-8 min-h-[400px]">
         {filteredLogs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[300px] text-center">
             <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">

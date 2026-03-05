@@ -169,7 +169,7 @@ const CertificateTypesPage = () => {
       )}
 
       {/* Main Content Area */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+      <div className="neu-card-lg p-8">
         {types.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -265,14 +265,14 @@ const CertificateTypesPage = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="neu-card-lg w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <h3 className="text-lg font-bold text-slate-900">
                 {modalMode === "add" ? "Add Certificate Type" : "Edit Certificate Type"}
               </h3>
               <button
                 onClick={closeModal}
-                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white rounded-xl transition-all"
+                className="p-2 text-slate-400 hover:text-slate-600 hover:neu-card transition-all"
               >
                 <X size={20} />
               </button>

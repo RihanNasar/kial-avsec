@@ -937,7 +937,7 @@ exports.createEntityCertificate = async (req, res, next) => {
         action: "CREATE",
         requestedBy: req.user.id,
         status: "PENDING",
-        payload: JSON.stringify({ type: finalType, validFrom, validTo, docUrl }),
+        payload: { type: finalType, validFrom, validTo, docUrl },
       },
     });
 
@@ -981,11 +981,14 @@ exports.updateEntityCertificate = async (req, res, next) => {
       return next(new AppError("Entity certificate not found or unauthorized", 404));
     }
 
-    updateData.status = "PENDING";
-
-    const updatedCert = await prisma.entityCertificate.update({
+    // Set status to PENDING on the record itself
+    await prisma.entityCertificate.update({
       where: { id: parseInt(id) },
-      data: updateData,
+      data: { status: "PENDING" },
+    });
+
+    const updatedCert = await prisma.entityCertificate.findUnique({
+      where: { id: parseInt(id) },
     });
 
     await prisma.approvalRequest.create({
@@ -995,7 +998,7 @@ exports.updateEntityCertificate = async (req, res, next) => {
         action: "UPDATE",
         requestedBy: req.user.id,
         status: "PENDING",
-        payload: JSON.stringify({ ...updateData, isRenewal: !!isRenewal }),
+        payload: { ...updateData, isRenewal: !!isRenewal },
       },
     });
 

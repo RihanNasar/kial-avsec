@@ -1,279 +1,369 @@
-// KIAL AVSEC Mobile - V2 Neumorphic Animated Login Screen
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-    View,
-    Text,
-    StyleSheet,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Dimensions,
-} from 'react-native';
-import { StatusBar } from 'expo-status-bar';
-import { useAuth } from '../../context/AuthContext';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { Ionicons } from '@expo/vector-icons';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import KialLogo from '../../components/ui/KialLogo';
-import NeumorphicView from '../../components/ui/NeumorphicView';
-import { colors, spacing, typography } from '../../theme';
+import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
+import { useAuth } from "../../context/AuthContext";
+import KialLogo from "../../components/ui/KialLogo";
 
-const { height: windowHeight } = Dimensions.get('window');
+export default function LoginScreen({ navigation }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [keepSignedIn, setKeepSignedIn] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  
+  const { login } = useAuth();
 
-const LoginScreen = () => {
-    const { login } = useAuth();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
 
-    const handleLogin = async () => {
-        if (!email.trim()) {
-            setError('Please enter your email');
-            return;
-        }
-        if (!password) {
-            setError('Please enter your password');
-            return;
-        }
-        setError('');
-        setLoading(true);
+    setLoading(true);
+    setError("");
 
-        const result = await login(email.trim().toLowerCase(), password);
+    try {
+      const result = await login(email, password);
 
-        if (!result.success) {
-            setError(result.error);
-        }
-        setLoading(false);
-    };
+      if (!result.success) {
+        setError(result.error || "Failed to sign in");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <View style={styles.container}>
-            <StatusBar style="dark" />
+  return (
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      style={styles.container}
+    >
+      <StatusBar style="light" />
+      
+      {/* Full Screen Gradient */}
+      <LinearGradient
+        colors={["#DC2626", "#B91C1C"]} // Tailwind red-600 to red-700
+        style={styles.gradientBackground}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        {/* Abstract Glow inside header */}
+        <View style={styles.headerGlow} />
 
-            {/* Subtle V2 Background Decorations */}
-            <View style={styles.redGlow} />
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Top Branding Section - Centered */}
+          <View style={styles.brandingContainer}>
+            <View style={styles.logoWrapper}>
+              <KialLogo width={76} height={76} color="#FFFFFF" brandColor="#FFFFFF" />
+            </View>
+            
+          </View>
 
-            <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                style={styles.keyboard}
-            >
-                <ScrollView
-                    contentContainerStyle={styles.scroll}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
+          {/* Form Section */}
+          <View style={styles.formWrapper}>
+            
+            {error ? (
+              <View style={styles.alertBox}>
+                <Ionicons name="alert-circle" size={18} color="#FFFFFF" />
+                <Text style={styles.alertText}>{error}</Text>
+              </View>
+            ) : null}
+
+            {/* Email Field */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>EMAIL ID</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="mail-outline" size={18} color="#FFFFFF" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="officer@kial.aero"
+                  placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                  value={email}
+                  onChangeText={setEmail}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  editable={!loading}
+                />
+              </View>
+            </View>
+
+            {/* Password Field */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>PASSWORD</Text>
+              <View style={styles.inputContainer}>
+                <Ionicons name="lock-closed-outline" size={18} color="#FFFFFF" style={styles.inputIcon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="••••••••"
+                  placeholderTextColor="rgba(255, 255, 255, 0.6)"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  editable={!loading}
+                />
+                <TouchableOpacity 
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeIconContainer}
+                  activeOpacity={0.7}
                 >
-                    {/* Header Banner - SVG Logo directly integrated */}
-                    <Animated.View
-                        entering={ZoomIn.delay(100).duration(500).springify().damping(15).stiffness(200)}
-                        style={styles.brandSection}
-                    >
-                        {/* The Logo sits on a soft Neumorphic pedestal */}
-                        <NeumorphicView borderRadius={100} style={styles.logoContainer}>
-                            <View style={styles.logoInner}>
-                                <KialLogo width={80} height={80} color={colors.textPrimary} />
-                            </View>
-                        </NeumorphicView>
-                        <Text style={styles.logoTitle}>K I A L</Text>
-                        <Text style={styles.title}>AVSEC System</Text>
-                        <Text style={styles.subtitle}>Securing Tomorrow's Skies</Text>
-                    </Animated.View>
+                  <Ionicons 
+                    name={showPassword ? "eye-off-outline" : "eye-outline"} 
+                    size={18} 
+                    color="#FFFFFF" 
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
 
-                    {/* Elevated Form Card - Now Neumorphic */}
-                    <Animated.View
-                        entering={FadeInDown.delay(300).duration(500).springify().damping(20).stiffness(200)}
-                    >
-                        <NeumorphicView borderRadius={32} style={styles.formCard}>
-                            <View style={styles.formInner}>
-                                <Text style={styles.formTitle}>Welcome back</Text>
-                                <Text style={styles.formSubtitle}>Verify your identity to proceed</Text>
+            {/* Keep Me Signed In */}
+            <TouchableOpacity 
+              style={styles.checkboxRow} 
+              onPress={() => setKeepSignedIn(!keepSignedIn)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.checkbox, keepSignedIn && styles.checkboxChecked]}>
+                {keepSignedIn && <Ionicons name="checkmark" size={14} color="#DC2626" />}
+              </View>
+              <Text style={styles.checkboxLabel}>Keep me signed in</Text>
+            </TouchableOpacity>
 
-                                {error ? (
-                                    <Animated.View
-                                        entering={ZoomIn.duration(300)}
-                                        style={styles.errorBanner}
-                                    >
-                                        <Text style={styles.errorText}>{error}</Text>
-                                    </Animated.View>
-                                ) : null}
+            {/* Submit Button */}
+            <TouchableOpacity 
+              style={[styles.submitButton, loading && styles.submitButtonDisabled]} 
+              onPress={handleLogin} 
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#DC2626" />
+              ) : (
+                <View style={styles.submitContent}>
+                  <Text style={styles.submitText}>Access Dashboard</Text>
+                  <Ionicons name="arrow-forward" size={18} color="#DC2626" style={styles.submitIcon} />
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
 
-                                <Input
-                                    label="Email Address"
-                                    value={email}
-                                    onChangeText={setEmail}
-                                    placeholder="name@blr-airport.com"
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    icon="mail-outline"
-                                />
-
-                                <Input
-                                    label="Password"
-                                    value={password}
-                                    onChangeText={setPassword}
-                                    placeholder="••••••••"
-                                    secureTextEntry
-                                    icon="lock-closed-outline"
-                                    style={{ marginBottom: spacing.xl }}
-                                />
-
-                                <Button
-                                    title="Authenticate"
-                                    onPress={handleLogin}
-                                    loading={loading}
-                                    size="lg"
-                                    variant="primary" // The V2 button now has physical tap animations
-                                    icon={<Ionicons name="finger-print-outline" size={20} color={colors.white} style={{ marginRight: 8 }} />}
-                                    style={styles.loginButton}
-                                />
-
-                                <View style={styles.forgotWrapper}>
-                                    <Text style={styles.forgotText}>Contact administrator for access</Text>
-                                </View>
-                            </View>
-                        </NeumorphicView>
-                    </Animated.View>
-
-                    {/* Footer */}
-                    <Text style={styles.footer}>
-                        Kempegowda International Airport Limited © {new Date().getFullYear()}
-                    </Text>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </View>
-    );
-};
+          {/* Footer */}
+          <Text style={styles.footerText}>
+            © {new Date().getFullYear()} KIAL SECURITY DEPT.
+          </Text>
+          
+        </ScrollView>
+      </LinearGradient>
+    </KeyboardAvoidingView>
+  );
+}
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        // MUST perfectly match the Neumorphic view surface for the 3D effect to work
-        backgroundColor: colors.background,
-    },
-    redGlow: {
-        position: 'absolute',
-        top: 0,
-        width: '100%',
-        height: windowHeight * 0.4,
-        backgroundColor: colors.primaryLight + '10', // Extremely faint red wash
-    },
-    keyboard: {
-        flex: 1,
-    },
-    scroll: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        paddingHorizontal: spacing.screenPadding,
-        paddingBottom: spacing.xxxl,
-        paddingTop: spacing.huge,
-        minHeight: windowHeight,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#B91C1C",
+  },
+  gradientBackground: {
+    flex: 1,
+  },
+  headerGlow: {
+    position: 'absolute',
+    top: -50,
+    right: -50,
+    width: 250,
+    height: 250,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 125,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 80 : 60,
+    paddingBottom: 40,
+  },
+  
+  // Branding
+  brandingContainer: {
+    marginBottom: 32,
+    alignItems: "center", // Centers the logo and title
+  },
+  logoWrapper: {
+    width: 110, 
+    height: 110, 
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 16, 
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    marginBottom: 16, 
+  },
+  headerTitle: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    letterSpacing: 2, // Added slightly more tracking since it's a standalone acronym now
+    textAlign: "center",
+  },
 
-    // Brand Section
-    brandSection: {
-        alignItems: 'center',
-        marginBottom: spacing.xxl,
-        zIndex: 10,
-    },
-    logoContainer: {
-        width: 140,
-        height: 140,
-        marginBottom: spacing.lg,
-    },
-    logoInner: {
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    logoTitle: {
-        fontSize: typography.size.sm,
-        fontWeight: typography.weight.black,
-        color: colors.primary,
-        fontFamily: typography.family,
-        letterSpacing: 8,
-        marginBottom: spacing.xxs,
-        marginTop: 4,
-    },
-    title: {
-        fontSize: typography.size.display,
-        fontWeight: typography.weight.bold,
-        color: colors.textPrimary,
-        fontFamily: typography.family,
-        letterSpacing: -0.5,
-    },
-    subtitle: {
-        fontSize: typography.size.md,
-        color: colors.textSecondary,
-        fontFamily: typography.family,
-        marginTop: spacing.xxs,
-        fontWeight: typography.weight.medium,
-    },
+  // Form Wrapper
+  formWrapper: {
+    width: "100%",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    padding: 24,
+    marginBottom: 24,
+  },
 
-    // Form Card
-    formCard: {
-        marginBottom: spacing.xxxl,
-    },
-    formInner: {
-        padding: spacing.cardPadding + 8,
-        paddingTop: spacing.cardPadding + 16,
-    },
-    formTitle: {
-        fontSize: typography.size.xxl,
-        fontWeight: typography.weight.bold,
-        color: colors.textPrimary,
-        fontFamily: typography.family,
-        marginBottom: spacing.xxs,
-        letterSpacing: -0.5,
-    },
-    formSubtitle: {
-        fontSize: typography.size.sm,
-        color: colors.textSecondary,
-        fontFamily: typography.family,
-        marginBottom: spacing.xl,
-        fontWeight: typography.weight.medium,
-    },
+  // Alert Box
+  alertBox: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  alertText: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "600",
+    marginLeft: 8,
+    flex: 1,
+  },
 
-    errorBanner: {
-        backgroundColor: colors.dangerLight,
-        padding: spacing.md,
-        borderRadius: 14,
-        marginBottom: spacing.lg,
-        borderLeftWidth: 4,
-        borderLeftColor: colors.danger,
-    },
-    errorText: {
-        fontSize: typography.size.sm,
-        color: colors.danger,
-        fontFamily: typography.family,
-        fontWeight: typography.weight.semibold,
-    },
+  // Inputs
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 11,
+    fontWeight: "bold",
+    color: "rgba(255, 255, 255, 0.8)",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.15)",
+    borderRadius: 12,
+    height: 54,
+    borderWidth: 1,
+    outline: "none",
+    borderColor: "rgba(255, 255, 255, 0.1)",
+  },
+  inputIcon: {
+    paddingLeft: 16,
+    paddingRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "500",
+    outline: "none",
+    color: "#FFFFFF",
+    height: "100%",
+    paddingRight: 16,
+  },
+  eyeIconContainer: {
+    paddingHorizontal: 16,
+    height: "100%",
+    justifyContent: "center",
+  },
 
-    loginButton: {
-        width: '100%',
-        marginTop: spacing.md,
-    },
+  // Checkbox
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+    paddingTop: 4,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+    backgroundColor: "transparent",
+  },
+  checkboxChecked: {
+    backgroundColor: "#FFFFFF",
+  },
+  checkboxLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
 
-    forgotWrapper: {
-        alignItems: 'center',
-        marginTop: spacing.xl,
-    },
-    forgotText: {
-        fontSize: typography.size.sm,
-        color: colors.textSecondary,
-        fontFamily: typography.family,
-        fontWeight: typography.weight.medium,
-    },
+  // Button
+  submitButton: {
+    width: "100%",
+    height: 54,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
+  submitContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  submitText: {
+    color: "#DC2626",
+    fontSize: 15,
+    fontWeight: "bold",
+    letterSpacing: 0.3,
+  },
+  submitIcon: {
+    marginLeft: 8,
+  },
 
-    footer: {
-        textAlign: 'center',
-        fontSize: typography.size.xs,
-        color: colors.textTertiary,
-        fontFamily: typography.family,
-        fontWeight: typography.weight.medium,
-        letterSpacing: 0.2,
-    },
+  // Footer
+  footerText: {
+    textAlign: "center",
+    fontSize: 10,
+    fontWeight: "bold",
+    color: "rgba(255, 255, 255, 0.6)",
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    marginTop: 20,
+  },
 });
-
-export default LoginScreen;

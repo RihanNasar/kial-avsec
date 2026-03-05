@@ -1,14 +1,6 @@
-// KIAL AVSEC Mobile - CSO Entities List Screen
+// KIAL AVSEC Mobile — V3 CSO Entities List
 import React, { useState, useCallback } from 'react';
-import {
-    View,
-    Text,
-    FlatList,
-    TextInput,
-    StyleSheet,
-    RefreshControl,
-    Platform,
-} from 'react-native';
+import { View, FlatList, TextInput, StyleSheet, RefreshControl, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import adminApi from '../../api/adminApi';
@@ -16,6 +8,7 @@ import EntityCard from '../../components/EntityCard';
 import LoadingOverlay from '../../components/ui/LoadingOverlay';
 import EmptyState from '../../components/ui/EmptyState';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 
 const EntitiesScreen = ({ navigation }) => {
     const [entities, setEntities] = useState([]);
@@ -36,16 +29,7 @@ const EntitiesScreen = ({ navigation }) => {
         }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            fetchEntities();
-        }, [])
-    );
-
-    const onRefresh = () => {
-        setRefreshing(true);
-        fetchEntities(true);
-    };
+    useFocusEffect(useCallback(() => { fetchEntities(); }, []));
 
     const filtered = entities.filter((e) =>
         e.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -65,31 +49,20 @@ const EntitiesScreen = ({ navigation }) => {
                     placeholderTextColor={colors.textTertiary}
                     style={styles.searchInput}
                 />
-                {search ? (
-                    <Ionicons name="close-circle" size={18} color={colors.textTertiary} onPress={() => setSearch('')} />
-                ) : null}
+                {search ? <Ionicons name="close-circle" size={18} color={colors.textTertiary} onPress={() => setSearch('')} /> : null}
             </View>
 
             <FlatList
                 data={filtered}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({ item }) => (
-                    <EntityCard
-                        entity={item}
-                        onPress={() => navigation.navigate('EntityDetail', { entityId: item.id })}
-                    />
+                    <EntityCard entity={item} onPress={() => navigation.navigate('EntityDetail', { entityId: item.id })} />
                 )}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />
-                }
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchEntities(true); }} tintColor={colors.primary} />}
                 contentContainerStyle={styles.list}
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
-                    <EmptyState
-                        icon="business-outline"
-                        title="No entities found"
-                        message={search ? 'Try a different search term' : 'No entities have been added yet'}
-                    />
+                    <EmptyState icon="business-outline" title="No entities found" message={search ? 'Try a different search term' : 'No entities have been added yet'} />
                 }
             />
         </View>
@@ -99,20 +72,20 @@ const EntitiesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.white,
+        backgroundColor: colors.background,
     },
     searchWrap: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: colors.background,
-        marginHorizontal: spacing.lg,
+        backgroundColor: colors.glassBg,
+        marginHorizontal: spacing.screenPadding,
         marginTop: spacing.md,
         marginBottom: spacing.sm,
-        borderRadius: 12,
+        borderRadius: theme.radius.sm,
         paddingHorizontal: spacing.md,
-        paddingVertical: Platform.OS === 'ios' ? spacing.md : 0,
+        paddingVertical: Platform.OS === 'ios' ? spacing.sm : 0,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: colors.glassBorderSubtle,
     },
     searchInput: {
         flex: 1,
@@ -120,10 +93,10 @@ const styles = StyleSheet.create({
         fontSize: typography.size.base,
         color: colors.textPrimary,
         fontFamily: typography.family,
-        paddingVertical: spacing.md,
+        paddingVertical: spacing.sm + 2,
     },
     list: {
-        padding: spacing.lg,
+        padding: spacing.screenPadding,
     },
 });
 

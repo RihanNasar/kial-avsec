@@ -1,16 +1,16 @@
-// KIAL AVSEC Mobile - V2 Animated Neumorphic Entity Dashboard
-import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, StyleSheet, TouchableOpacity } from 'react-native';
+// KIAL AVSEC Mobile — V3 Premium Entity Dashboard
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { View, Text, ScrollView, RefreshControl, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
-import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { BarChart } from 'react-native-gifted-charts';
 import entityApi from '../../api/entityApi';
 import StatCard from '../../components/StatCard';
 import LoadingOverlay from '../../components/ui/LoadingOverlay';
-import NeumorphicView from '../../components/ui/NeumorphicView';
+import GlassCard from '../../components/ui/GlassCard';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 
 const DashboardScreen = ({ navigation }) => {
     const { user, logout } = useAuth();
@@ -33,6 +33,27 @@ const DashboardScreen = ({ navigation }) => {
 
     useFocusEffect(useCallback(() => { fetchDashboard(); }, []));
 
+    // Entrance animations
+    const headerAnim = useRef(new Animated.Value(0)).current;
+    const card1Anim = useRef(new Animated.Value(0)).current;
+    const card2Anim = useRef(new Animated.Value(0)).current;
+    const card3Anim = useRef(new Animated.Value(0)).current;
+    const card4Anim = useRef(new Animated.Value(0)).current;
+    const chartAnim = useRef(new Animated.Value(0)).current;
+    const actionsAnim = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.stagger(100, [
+            Animated.timing(headerAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+            Animated.spring(card1Anim, { toValue: 1, damping: 14, stiffness: 180, useNativeDriver: true }),
+            Animated.spring(card2Anim, { toValue: 1, damping: 14, stiffness: 180, useNativeDriver: true }),
+            Animated.spring(card3Anim, { toValue: 1, damping: 14, stiffness: 180, useNativeDriver: true }),
+            Animated.spring(card4Anim, { toValue: 1, damping: 14, stiffness: 180, useNativeDriver: true }),
+            Animated.timing(chartAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+            Animated.timing(actionsAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
+        ]).start();
+    }, []);
+
     if (loading && !data) return <LoadingOverlay />;
 
     const stats = data || {};
@@ -51,47 +72,51 @@ const DashboardScreen = ({ navigation }) => {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchDashboard(true); }} tintColor={colors.primary} />}
             showsVerticalScrollIndicator={false}
         >
-            {/* Header */}
-            <Animated.View
-                entering={FadeInDown.duration(500)}
-                style={styles.header}
-            >
+            {/* ── Header ── */}
+            <Animated.View style={[styles.header, { opacity: headerAnim, transform: [{ translateY: headerAnim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }] }]}>
                 <View style={styles.userInfo}>
                     <Text style={styles.greeting}>Welcome back,</Text>
                     <Text style={styles.userName}>{user?.fullName || 'Entity Head'}</Text>
-                    {stats.entityName && <Text style={styles.entityLabel}>{stats.entityName}</Text>}
+                    {stats.entityName && (
+                        <View style={styles.entityBadge}>
+                            <View style={styles.entityDot} />
+                            <Text style={styles.entityLabel}>{stats.entityName}</Text>
+                        </View>
+                    )}
                 </View>
-                <TouchableOpacity onPress={logout} style={styles.logoutBtn} activeOpacity={0.7}>
-                    <NeumorphicView borderRadius={16} style={styles.logoutNeu}>
-                        <Ionicons name="log-out-outline" size={24} color={colors.primary} />
-                    </NeumorphicView>
+                <TouchableOpacity onPress={logout} activeOpacity={0.7}>
+                    <View style={styles.logoutBtn}>
+                        <Ionicons name="log-out-outline" size={22} color={colors.primary} />
+                    </View>
                 </TouchableOpacity>
             </Animated.View>
 
-            {/* Stats - Staggered */}
-            <View style={styles.statsRow}>
-                <Animated.View entering={ZoomIn.delay(100).duration(500)} style={{ flex: 1 }}>
+            {/* ── Bento Stats ── */}
+            <View style={styles.bentoGrid}>
+                <Animated.View style={[styles.bentoHalf, { opacity: card1Anim, transform: [{ scale: card1Anim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }] }]}>
                     <StatCard title="Active Staff" value={stats.totalStaff ?? 0} icon="people-outline" iconColor={colors.accent} />
                 </Animated.View>
-                <Animated.View entering={ZoomIn.delay(200).duration(500)} style={{ flex: 1 }}>
+                <Animated.View style={[styles.bentoHalf, { opacity: card2Anim, transform: [{ scale: card2Anim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }] }]}>
                     <StatCard title="Certificates" value={stats.totalCertificates ?? 0} icon="document-text-outline" iconColor={colors.primary} />
                 </Animated.View>
             </View>
-
-            <View style={styles.statsRow}>
-                <Animated.View entering={ZoomIn.delay(300).duration(500)} style={{ flex: 1 }}>
+            <View style={styles.bentoGrid}>
+                <Animated.View style={[styles.bentoHalf, { opacity: card3Anim, transform: [{ scale: card3Anim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }] }]}>
                     <StatCard title="Expiring Soon" value={stats.expiringCertificates ?? 0} icon="alert-circle-outline" iconColor={colors.warning} subtitle="Next 30 days" />
                 </Animated.View>
-                <Animated.View entering={ZoomIn.delay(400).duration(500)} style={{ flex: 1 }}>
+                <Animated.View style={[styles.bentoHalf, { opacity: card4Anim, transform: [{ scale: card4Anim.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1] }) }] }]}>
                     <StatCard title="Awaiting Action" value={stats.pendingCertificates ?? 0} icon="time-outline" iconColor={colors.danger} subtitle="Approvals" />
                 </Animated.View>
             </View>
 
-            {/* Data Visualization Chart */}
-            <Animated.View entering={FadeInDown.delay(500).duration(500)}>
-                <Text style={styles.sectionTitle}>Entity Overview</Text>
-                <NeumorphicView borderRadius={24} style={styles.chartCardWrapper}>
-                    <View style={styles.chartCardInner}>
+            {/* ── Entity Overview Chart ── */}
+            <Animated.View style={{ opacity: chartAnim }}>
+                <View style={styles.sectionHeader}>
+                    <View style={styles.sectionAccent} />
+                    <Text style={styles.sectionTitle}>Entity Overview</Text>
+                </View>
+                <GlassCard borderRadius={theme.radius.xl} variant="elevated">
+                    <View style={styles.chartInner}>
                         <BarChart
                             data={chartData}
                             barWidth={32}
@@ -101,40 +126,47 @@ const DashboardScreen = ({ navigation }) => {
                             hideRules
                             xAxisThickness={0}
                             yAxisThickness={0}
-                            yAxisTextStyle={{ color: colors.textTertiary, fontSize: 10 }}
+                            yAxisTextStyle={{ color: colors.textTertiary, fontSize: 10, fontFamily: typography.family }}
                             noOfSections={3}
                             maxValue={Math.max(...chartData.map(d => d.value), 5) * 1.2}
                             isAnimated
-                            animationDuration={1500}
+                            animationDuration={1200}
                         />
                     </View>
-                </NeumorphicView>
+                </GlassCard>
             </Animated.View>
 
-            {/* Quick Actions */}
-            <Animated.View entering={FadeInDown.delay(600).duration(500)}>
-                <Text style={styles.sectionTitle}>Dashboard Actions</Text>
+            {/* ── Quick Actions ── */}
+            <Animated.View style={{ opacity: actionsAnim }}>
+                <View style={styles.sectionHeader}>
+                    <View style={styles.sectionAccent} />
+                    <Text style={styles.sectionTitle}>Dashboard Actions</Text>
+                </View>
                 <View style={styles.actionsRow}>
                     <TouchableOpacity style={styles.actionCard} activeOpacity={0.7} onPress={() => navigation.navigate('StaffTab')}>
-                        <NeumorphicView borderRadius={20} style={styles.actionNeu}>
-                            <View style={[styles.actionIcon, { backgroundColor: colors.accentLight + '15' }]}>
-                                <Ionicons name="people" size={26} color={colors.accent} />
+                        <GlassCard borderRadius={theme.radius.lg} noPadding>
+                            <View style={styles.actionInner}>
+                                <View style={[styles.actionIcon, { backgroundColor: colors.accentSoft }]}>
+                                    <Ionicons name="people" size={24} color={colors.accent} />
+                                </View>
+                                <Text style={styles.actionLabel}>My Staff</Text>
                             </View>
-                            <Text style={styles.actionLabel}>My Staff</Text>
-                        </NeumorphicView>
+                        </GlassCard>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.actionCard} activeOpacity={0.7} onPress={() => navigation.navigate('CertificatesTab')}>
-                        <NeumorphicView borderRadius={20} style={styles.actionNeu}>
-                            <View style={[styles.actionIcon, { backgroundColor: colors.primaryLight + '15' }]}>
-                                <Ionicons name="document-text" size={26} color={colors.primary} />
+                        <GlassCard borderRadius={theme.radius.lg} noPadding>
+                            <View style={styles.actionInner}>
+                                <View style={[styles.actionIcon, { backgroundColor: colors.primaryGlow }]}>
+                                    <Ionicons name="document-text" size={24} color={colors.primary} />
+                                </View>
+                                <Text style={styles.actionLabel}>Certificates</Text>
                             </View>
-                            <Text style={styles.actionLabel}>Certificates</Text>
-                        </NeumorphicView>
+                        </GlassCard>
                     </TouchableOpacity>
                 </View>
             </Animated.View>
 
-            <View style={{ height: spacing.massive }} />
+            <View style={{ height: spacing.thumbZone }} />
         </ScrollView>
     );
 };
@@ -145,14 +177,14 @@ const styles = StyleSheet.create({
         backgroundColor: colors.background,
     },
     content: {
-        padding: spacing.lg,
+        padding: spacing.screenPadding,
         paddingTop: spacing.xxl,
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: spacing.xxl,
+        marginBottom: spacing.sectionGap,
     },
     userInfo: {
         flex: 1,
@@ -163,81 +195,96 @@ const styles = StyleSheet.create({
         color: colors.textSecondary,
         fontFamily: typography.family,
         fontWeight: typography.weight.medium,
-        letterSpacing: 0.2,
     },
     userName: {
-        fontSize: typography.size.display,
-        fontWeight: typography.weight.black,
+        fontSize: typography.size.xl,
+        fontWeight: typography.weight.bold,
         color: colors.textPrimary,
         fontFamily: typography.family,
         marginTop: 4,
-        letterSpacing: -1,
+        letterSpacing: -0.5,
+    },
+    entityBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: spacing.xs,
+    },
+    entityDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: colors.primary,
+        marginRight: spacing.xs,
     },
     entityLabel: {
         fontSize: typography.size.sm,
         color: colors.primary,
-        fontWeight: typography.weight.bold,
+        fontWeight: typography.weight.semibold,
         fontFamily: typography.family,
-        marginTop: 6,
-        letterSpacing: 0.2,
     },
     logoutBtn: {
-        width: 52,
-        height: 52,
-    },
-    logoutNeu: {
-        width: '100%',
-        height: '100%',
+        width: 48,
+        height: 48,
+        borderRadius: theme.radius.md,
+        backgroundColor: colors.glassBg,
+        borderWidth: 1,
+        borderColor: colors.glassBorderSubtle,
         justifyContent: 'center',
         alignItems: 'center',
     },
-    statsRow: {
+    bentoGrid: {
         flexDirection: 'row',
-        gap: spacing.md,
+        gap: spacing.bentoGap,
+        marginBottom: spacing.bentoGap,
+    },
+    bentoHalf: { flex: 1 },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: spacing.sectionGap,
         marginBottom: spacing.md,
     },
+    sectionAccent: {
+        width: 3,
+        height: 18,
+        backgroundColor: colors.primary,
+        borderRadius: 2,
+        marginRight: spacing.sm,
+    },
     sectionTitle: {
-        fontSize: typography.size.lg,
+        fontSize: typography.size.md,
         fontWeight: typography.weight.bold,
         color: colors.textPrimary,
         fontFamily: typography.family,
         letterSpacing: -0.2,
-        marginTop: spacing.xl,
-        marginBottom: spacing.md,
     },
-    chartCardWrapper: {
-        width: '100%',
-    },
-    chartCardInner: {
-        padding: spacing.lg,
+    chartInner: {
         alignItems: 'center',
         justifyContent: 'center',
+        paddingVertical: spacing.sm,
     },
     actionsRow: {
         flexDirection: 'row',
-        gap: spacing.md,
+        gap: spacing.bentoGap,
     },
-    actionCard: {
-        flex: 1,
-    },
-    actionNeu: {
-        padding: spacing.base,
+    actionCard: { flex: 1 },
+    actionInner: {
+        padding: spacing.md,
         alignItems: 'center',
     },
     actionIcon: {
-        width: 52,
-        height: 52,
-        borderRadius: 16,
+        width: 48,
+        height: 48,
+        borderRadius: theme.radius.md,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: spacing.sm,
+        marginBottom: spacing.xs,
     },
     actionLabel: {
         fontSize: typography.size.sm,
-        fontWeight: typography.weight.bold,
+        fontWeight: typography.weight.semibold,
         color: colors.textPrimary,
         fontFamily: typography.family,
-        letterSpacing: 0.2,
     },
 });
 

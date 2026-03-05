@@ -1,4 +1,4 @@
-// KIAL AVSEC Mobile - Entity Head Staff Screen
+// KIAL AVSEC Mobile — V3 Entity Head Staff Screen
 import React, { useState, useCallback } from 'react';
 import { View, FlatList, TextInput, StyleSheet, RefreshControl, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import StaffCard from '../../components/StaffCard';
 import LoadingOverlay from '../../components/ui/LoadingOverlay';
 import EmptyState from '../../components/ui/EmptyState';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 
 const MyStaffScreen = ({ navigation }) => {
     const [staff, setStaff] = useState([]);
@@ -53,10 +54,7 @@ const MyStaffScreen = ({ navigation }) => {
                 data={filtered}
                 keyExtractor={(item) => String(item.id)}
                 renderItem={({ item }) => (
-                    <StaffCard
-                        staff={item}
-                        onPress={() => navigation.navigate('StaffDetail', { staffId: item.id })}
-                    />
+                    <StaffCard staff={item} onPress={() => navigation.navigate('StaffDetail', { staffId: item.id })} />
                 )}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchStaff(true); }} />}
                 contentContainerStyle={styles.list}
@@ -70,15 +68,29 @@ const MyStaffScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.white },
+    container: { flex: 1, backgroundColor: colors.background },
     searchWrap: {
-        flexDirection: 'row', alignItems: 'center', backgroundColor: colors.background,
-        marginHorizontal: spacing.lg, marginTop: spacing.md, marginBottom: spacing.sm,
-        borderRadius: 12, paddingHorizontal: spacing.md, paddingVertical: Platform.OS === 'ios' ? spacing.md : 0,
-        borderWidth: 1, borderColor: colors.border,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.glassBg,
+        marginHorizontal: spacing.screenPadding,
+        marginTop: spacing.md,
+        marginBottom: spacing.sm,
+        borderRadius: theme.radius.sm,
+        paddingHorizontal: spacing.md,
+        paddingVertical: Platform.OS === 'ios' ? spacing.sm : 0,
+        borderWidth: 1,
+        borderColor: colors.glassBorderSubtle,
     },
-    searchInput: { flex: 1, marginLeft: spacing.sm, fontSize: typography.size.base, color: colors.textPrimary, fontFamily: typography.family, paddingVertical: spacing.md },
-    list: { padding: spacing.lg },
+    searchInput: {
+        flex: 1,
+        marginLeft: spacing.sm,
+        fontSize: typography.size.base,
+        color: colors.textPrimary,
+        fontFamily: typography.family,
+        paddingVertical: spacing.sm + 2,
+    },
+    list: { padding: spacing.screenPadding },
 });
 
 export default MyStaffScreen;

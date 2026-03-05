@@ -184,12 +184,7 @@ const Login = () => {
                 </span>
               </label>
 
-              <a
-                href="#"
-                className="text-xs font-bold text-red-600 hover:text-red-700 hover:underline transition-colors"
-              >
-                Help?
-              </a>
+             
             </div>
 
             {/* Submit Button */}

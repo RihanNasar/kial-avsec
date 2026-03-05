@@ -1,13 +1,13 @@
-// KIAL AVSEC Mobile - V2 Neumorphic Animated Button Component
-import React, { useMemo } from 'react';
-import { Text, ActivityIndicator, StyleSheet, Platform, Pressable } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+// KIAL AVSEC Mobile — V3 Glassmorphic Button Component
+import React, { useRef } from 'react';
+import { Text, ActivityIndicator, StyleSheet, Pressable, View, Animated } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, typography } from '../../theme';
+import theme from '../../theme';
 
 /**
- * @param {string} variant - 'primary' | 'secondary' | 'danger' | 'ghost' | 'neumorphic'
- * @param {string} size - 'sm' | 'md' | 'lg'
+ * @param {'primary' | 'secondary' | 'danger' | 'ghost'} variant
+ * @param {'sm' | 'md' | 'lg'} size
  */
 const Button = ({
     title,
@@ -21,116 +21,104 @@ const Button = ({
 }) => {
     const isDisabled = disabled || loading;
 
-    const variantStyles = {
-        primary: {
-            bg: colors.primary,
-            text: colors.textInverse,
-            isNeumorphic: false,
-        },
-        neumorphic: {
-            bg: colors.surface,
-            text: colors.primary,
-            isNeumorphic: true,
-        },
-        secondary: {
-            bg: 'transparent',
-            border: colors.border,
-            text: colors.textPrimary,
-            isNeumorphic: false,
-        },
-        danger: {
-            bg: colors.danger,
-            text: colors.textInverse,
-            isNeumorphic: false,
-        },
-        ghost: {
-            bg: 'transparent',
-            text: colors.textSecondary,
-            isNeumorphic: false,
-        },
-    };
-
     const sizeStyles = {
-        sm: { paddingVertical: 10, paddingHorizontal: 16, fontSize: typography.size.sm, radius: 12 },
-        md: { paddingVertical: 16, paddingHorizontal: 24, fontSize: typography.size.md, radius: 16 },
-        lg: { paddingVertical: 20, paddingHorizontal: 32, fontSize: typography.size.lg, radius: 20 },
+        sm: { paddingVertical: 10, paddingHorizontal: 18, fontSize: typography.size.sm, radius: 12 },
+        md: { paddingVertical: 16, paddingHorizontal: 28, fontSize: typography.size.md, radius: 16 },
+        lg: { paddingVertical: 18, paddingHorizontal: 36, fontSize: typography.size.lg, radius: 20 },
     };
 
-    const v = variantStyles[variant];
     const s = sizeStyles[size];
 
-    const scale = useSharedValue(1);
-    const opacity = useSharedValue(1);
+    const scale = useRef(new Animated.Value(1)).current;
 
-    const animatedStyle = useAnimatedStyle(() => {
-        return {
-            transform: [{ scale: scale.value }],
-            opacity: opacity.value,
-        };
-    });
+    const animatedStyle = { transform: [{ scale }] };
 
     const handlePressIn = () => {
-        if (!isDisabled) {
-            scale.value = withSpring(0.95);
-            opacity.value = withSpring(0.9);
-        }
+        if (!isDisabled) Animated.spring(scale, { toValue: 0.96, damping: 15, stiffness: 300, useNativeDriver: true }).start();
     };
-
     const handlePressOut = () => {
-        if (!isDisabled) {
-            scale.value = withSpring(1);
-            opacity.value = withSpring(1);
-        }
+        if (!isDisabled) Animated.spring(scale, { toValue: 1, damping: 15, stiffness: 300, useNativeDriver: true }).start();
     };
 
-    return (
-        <AnimatedPressable
-            onPress={isDisabled ? undefined : onPress}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            style={[
-                styles.base,
-                // Apply Neumorphic Shadows if variant requests it
-                v.isNeumorphic && !isDisabled && styles.neumorphicShadows,
-                // Fallback standard elevation for classic variants
-                variant === 'primary' && !isDisabled && styles.primaryElevated,
-                {
-                    backgroundColor: v.bg,
-                    paddingVertical: s.paddingVertical,
-                    paddingHorizontal: s.paddingHorizontal,
-                    borderRadius: s.radius,
-                    borderWidth: v.border ? 1 : 0,
-                    borderColor: v.border || 'transparent',
-                },
-                style,
-                animatedStyle,
-            ]}
-        >
+    const textColor =
+        variant === 'primary' || variant === 'danger'
+            ? colors.textInverse
+            : variant === 'secondary'
+                ? colors.primary
+                : colors.textSecondary;
+
+    const renderContent = () => (
+        <View style={[styles.inner, { paddingVertical: s.paddingVertical, paddingHorizontal: s.paddingHorizontal }]}>
             {loading ? (
-                <ActivityIndicator size="small" color={v.text} />
+                <ActivityIndicator size="small" color={textColor} />
             ) : (
                 <>
                     {icon && <>{icon}</>}
-                    <Text
-                        style={[
-                            styles.text,
-                            {
-                                color: v.text,
-                                fontSize: s.fontSize,
-                                marginLeft: icon ? spacing.xs : 0,
-                            },
-                        ]}
-                    >
+                    <Text style={[styles.text, { color: textColor, fontSize: s.fontSize, marginLeft: icon ? spacing.xs : 0 }]}>
                         {title}
                     </Text>
                 </>
             )}
-        </AnimatedPressable>
+        </View>
+    );
+
+    if (variant === 'primary') {
+        return (
+            <Animated.View style={[animatedStyle, style, isDisabled && styles.disabled]}>
+                <Pressable
+                    onPress={isDisabled ? undefined : onPress}
+                    onPressIn={handlePressIn}
+                    onPressOut={handlePressOut}
+                >
+                    <LinearGradient
+                        colors={[colors.gradientRedStart, colors.gradientRedEnd]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={[styles.gradient, { borderRadius: s.radius }, !isDisabled && theme.shadow.colored]}
+                    >
+                        {renderContent()}
+                    </LinearGradient>
+                </Pressable>
+            </Animated.View>
+        );
+    }
+
+    const bgStyle =
+        variant === 'danger'
+            ? { backgroundColor: colors.danger }
+            : variant === 'secondary'
+                ? { backgroundColor: colors.glassBg, borderWidth: 1, borderColor: colors.border }
+                : { backgroundColor: 'transparent' };
+
+    return (
+        <Animated.View
+            style={[
+                styles.base,
+                bgStyle,
+                { borderRadius: s.radius },
+                variant === 'danger' && !isDisabled && { ...theme.shadow.sm, shadowColor: colors.danger },
+                style,
+                animatedStyle,
+                isDisabled && styles.disabled,
+            ]}
+        >
+            <Pressable
+                onPress={isDisabled ? undefined : onPress}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+            >
+                {renderContent()}
+            </Pressable>
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
-    base: {
+    base: {},
+    gradient: {
+        overflow: 'hidden',
+    },
+    inner: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
@@ -138,29 +126,11 @@ const styles = StyleSheet.create({
     text: {
         fontFamily: typography.family,
         fontWeight: typography.weight.bold,
-        letterSpacing: 0.5,
+        letterSpacing: 0.3,
     },
-    primaryElevated: {
-        shadowColor: colors.primary,
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
-        shadowRadius: 12,
-        elevation: 8,
+    disabled: {
+        opacity: 0.5,
     },
-    neumorphicShadows: {
-        ...Platform.select({
-            ios: {
-                shadowColor: colors.neuDark,
-                shadowOffset: { width: 6, height: 6 },
-                shadowOpacity: 0.8,
-                shadowRadius: 10,
-            },
-            android: {
-                elevation: 8,
-                shadowColor: colors.neuDark,
-            },
-        }),
-    }
 });
 
 export default Button;

@@ -219,7 +219,7 @@ const AddStaffPage = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Section 1: Personal Details */}
-        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+        <div className="neu-card-lg p-8">
           <h2 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
             <User size={20} className="text-blue-600" />
             Personal Details
@@ -381,7 +381,7 @@ const AddStaffPage = () => {
         </div>
 
         {/* Section 2: Certificates */}
-        <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100">
+        <div className="neu-card-lg p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <FileText size={20} className="text-emerald-600" />

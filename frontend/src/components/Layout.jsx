@@ -136,10 +136,10 @@ const Layout = ({ children }) => {
     <div className="flex h-screen w-full bg-[#F3F4F6] p-4 md:p-6 overflow-hidden font-['Poppins'] text-slate-900 selection:bg-blue-100 selection:text-blue-900">
       {/* SIDEBAR COMPONENT (Desktop) */}
       <aside 
-        className={`hidden lg:flex flex-col ${isCollapsed ? 'w-[96px]' : 'w-[280px]'} h-full bg-white rounded-[32px] shadow-xl shadow-slate-200/50 overflow-hidden relative shrink-0 z-20 transition-all duration-300 ease-in-out`}
+        className={`hidden lg:flex flex-col ${isCollapsed ? 'w-[96px]' : 'w-[280px]'} h-full bg-gradient-to-b from-red-50/90 via-rose-50/80 to-red-50/90 backdrop-blur-xl rounded-[32px] shadow-xl shadow-red-200/20 border border-red-200/40 overflow-hidden relative shrink-0 z-20 transition-all duration-300 ease-out`}
       >
         {/* 1. Header & Brand Area */}
-        <div className={`pt-8 pb-2 border-b border-transparent ${isCollapsed ? 'px-4' : 'px-6'} transition-all duration-300`}>
+        <div className={`pt-8 pb-2 border-b border-red-200/30 ${isCollapsed ? 'px-4' : 'px-6'} transition-all duration-300`}>
           {/* LOGO AREA & TOGGLE */}
           <div className="relative flex items-center justify-center mb-8 h-12 transition-all duration-300">
             <div className="flex items-center justify-center">
@@ -153,14 +153,14 @@ const Layout = ({ children }) => {
             {/* Collapse Toggle Button - Always aligned right */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`absolute right-0 p-1.5 bg-slate-50 border border-slate-100 hover:bg-slate-100 hover:border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-all ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+              className={`absolute right-0 p-1.5 bg-red-50 border border-red-100 hover:bg-red-100 rounded-xl text-red-400 hover:text-red-600 transition-all duration-200 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
               title="Collapse Sidebar"
             >
               <ChevronLeft size={18} />
             </button>
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`absolute p-1.5 bg-slate-50 border border-slate-100 hover:bg-slate-100 hover:border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-all ${isCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`absolute p-1.5 bg-red-50 border border-red-100 hover:bg-red-100 rounded-xl text-red-400 hover:text-red-600 transition-all duration-200 ${isCollapsed ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               title="Expand Sidebar"
             >
               <ChevronRight size={18} />
@@ -168,9 +168,9 @@ const Layout = ({ children }) => {
           </div>
 
           {/* TOP WIDGET: Date Only */}
-          <div className={`bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden transition-all duration-300 ${isCollapsed ? 'rounded-2xl p-3' : 'rounded-2xl p-4'}`}>
+          <div className={`bg-red-100/40 border border-red-200/30 flex items-center justify-center overflow-hidden transition-all duration-300 ${isCollapsed ? 'rounded-2xl p-3' : 'rounded-2xl p-4'}`}>
             <div className={`flex items-center gap-3 w-full ${isCollapsed ? 'justify-center' : ''}`}>
-              <div className="p-2 bg-white rounded-xl shadow-sm text-blue-600 shrink-0">
+              <div className="p-2 bg-white rounded-xl shadow-sm text-red-500 shrink-0 border border-red-100">
                 <Calendar size={isCollapsed ? 20 : 18} className="transition-all duration-300" />
               </div>
               {!isCollapsed && (
@@ -186,7 +186,7 @@ const Layout = ({ children }) => {
         </div>
 
         {/* 2. Scrollable Navigation */}
-        <nav className={`flex-1 overflow-y-auto ${isCollapsed ? 'px-4' : 'px-6'} py-4 space-y-8 no-scrollbar transition-all duration-300`}>
+        <nav className={`flex-1 overflow-y-auto sidebar-no-scrollbar ${isCollapsed ? 'px-4' : 'px-6'} py-4 space-y-8 transition-all duration-300`}>
           {/* Navigation Group */}
           <div>
             {!isCollapsed && (
@@ -205,22 +205,22 @@ const Layout = ({ children }) => {
                     ${isCollapsed ? 'justify-center p-3.5' : 'gap-4 px-4 py-3'}
                     ${
                       isActive(item.path)
-                        ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
-                        : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium"
+                        ? "bg-red-50 text-red-700 shadow-sm border border-red-100 font-semibold"
+                        : "text-slate-500 hover:text-red-600 hover:bg-red-50/50 font-medium"
                     }
                   `}
                 >
                   <item.icon
                     size={isCollapsed ? 22 : 20}
                     strokeWidth={isActive(item.path) ? 2.5 : 2}
-                    className={`shrink-0 transition-all duration-300 ${
+                    className={`shrink-0 transition-all duration-200 ${
                       isActive(item.path)
-                        ? "text-white"
-                        : "text-slate-400 group-hover:text-slate-600"
+                        ? "text-red-500"
+                        : "text-slate-400 group-hover:text-red-500"
                     }`}
                   />
                   {!isCollapsed && (
-                    <span className="text-sm truncate whitespace-nowrap fade-in duration-300">
+                    <span className="text-sm truncate whitespace-nowrap">
                       {item.label}
                     </span>
                   )}
@@ -248,22 +248,22 @@ const Layout = ({ children }) => {
                       ${isCollapsed ? 'justify-center p-3.5' : 'gap-4 px-4 py-3'}
                       ${
                         isActive(item.path)
-                          ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20"
-                          : "text-slate-500 hover:text-slate-900 hover:bg-slate-50 font-medium"
+                          ? "bg-red-50 text-red-700 shadow-sm border border-red-100 font-semibold"
+                          : "text-slate-500 hover:text-red-600 hover:bg-red-50/50 font-medium"
                       }
                     `}
                   >
                     <item.icon
                       size={isCollapsed ? 22 : 20}
                       strokeWidth={isActive(item.path) ? 2.5 : 2}
-                      className={`shrink-0 transition-all duration-300 ${
+                      className={`shrink-0 transition-all duration-200 ${
                         isActive(item.path)
-                          ? "text-white"
-                          : "text-slate-400 group-hover:text-slate-600"
+                          ? "text-red-500"
+                          : "text-slate-400 group-hover:text-red-500"
                       }`}
                     />
                     {!isCollapsed && (
-                      <span className="text-sm truncate whitespace-nowrap fade-in duration-300">
+                      <span className="text-sm truncate whitespace-nowrap">
                         {item.label}
                       </span>
                     )}
@@ -277,9 +277,9 @@ const Layout = ({ children }) => {
         {/* 3. Bottom Area: Profile Only */}
         <div className={`pb-6 mt-auto transition-all duration-300 ${isCollapsed ? 'px-4' : 'px-6'}`}>
           {/* User Profile */}
-          <div className={`flex items-center pt-4 border-t border-slate-100 transition-all duration-300 ${isCollapsed ? 'flex-col gap-4' : 'justify-between gap-3 pl-1'}`}>
+          <div className={`flex items-center pt-4 border-t border-red-200/30 transition-all duration-300 ${isCollapsed ? 'flex-col gap-4' : 'justify-between gap-3 pl-1'}`}>
             <div className={`flex items-center gap-3 ${isCollapsed ? 'flex-col' : ''}`}>
-              <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold shadow-sm shrink-0">
+              <div className="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-red-600 font-bold shadow-sm shrink-0">
                 {user?.name?.charAt(0) || "U"}
               </div>
               
@@ -295,7 +295,7 @@ const Layout = ({ children }) => {
                         {user?.staffProfile?.designation || "Staff Member"}
                       </span>
                       {user?.staffProfile?.department && (
-                        <span className="text-[9px] font-bold text-blue-500 uppercase tracking-wider truncate">
+                        <span className="text-[9px] font-bold text-red-500 uppercase tracking-wider truncate">
                           {user.staffProfile.department}
                         </span>
                       )}
@@ -311,7 +311,7 @@ const Layout = ({ children }) => {
 
             <button
               onClick={handleLogout}
-              className={`flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors ${isCollapsed ? 'w-10 h-10 bg-slate-50 border border-slate-100 shadow-sm shrink-0' : 'w-8 h-8 shrink-0'}`}
+              className={`flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors duration-200 ${isCollapsed ? 'w-10 h-10 bg-red-50/50 border border-red-100 shadow-sm shrink-0' : 'w-8 h-8 shrink-0'}`}
               title="Logout"
             >
               <LogOut size={isCollapsed ? 18 : 16} />
@@ -378,7 +378,7 @@ const Layout = ({ children }) => {
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl p-6 flex flex-col animate-in slide-in-from-left duration-300">
+          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-gradient-to-b from-red-50/95 via-rose-50/90 to-red-50/95 backdrop-blur-xl shadow-2xl p-6 flex flex-col animate-in slide-in-from-left duration-300 border-r border-red-200/40">
             {/* Mobile Brand */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center justify-center flex-1">
@@ -390,25 +390,25 @@ const Layout = ({ children }) => {
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-500 hover:bg-slate-100"
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-colors"
               >
                 <X size={20} />
               </button>
             </div>
 
             {/* Mobile Navigation */}
-            <nav className="space-y-2 flex-1 overflow-y-auto no-scrollbar">
+            <nav className="space-y-2 flex-1 overflow-y-auto sidebar-no-scrollbar">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
                   className={`
-                     flex items-center gap-4 p-3.5 rounded-2xl text-sm font-medium transition-all
+                     flex items-center gap-4 p-3.5 rounded-2xl text-sm font-medium transition-all duration-200
                      ${
                        isActive(item.path)
-                         ? "bg-slate-900 text-white shadow-lg"
-                         : "text-slate-500 hover:bg-slate-50"
+                         ? "bg-red-50 text-red-700 shadow-sm border border-red-100"
+                         : "text-slate-500 hover:bg-red-50/50 hover:text-red-600"
                      }
                    `}
                 >
@@ -421,7 +421,7 @@ const Layout = ({ children }) => {
             {/* Mobile Logout */}
             <button
               onClick={handleLogout}
-              className="mt-4 flex items-center justify-center gap-2 w-full py-4 bg-red-50 text-red-600 rounded-2xl font-bold text-sm hover:bg-red-100 transition-colors"
+              className="mt-4 flex items-center justify-center gap-2 w-full py-4 bg-red-50 text-red-600 rounded-2xl font-bold text-sm hover:bg-red-100 transition-colors border border-red-100"
             >
               <LogOut size={18} /> Sign Out
             </button>

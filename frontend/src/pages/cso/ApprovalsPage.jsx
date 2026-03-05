@@ -119,7 +119,7 @@ const ApprovalsPage = () => {
         </div>
 
         {/* Count Badge */}
-        <div className="bg-white px-4 py-2.5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-2">
+        <div className="bg-white px-4 py-2.5 rounded-2xl flex items-center gap-2">
           <FileCheck size={16} className="text-blue-500" />
           <span className="text-xs font-bold text-slate-600">
             {activeTab === 'pending' ? 'Pending Requests:' : 'History:'}
@@ -132,7 +132,7 @@ const ApprovalsPage = () => {
       {success && <Alert type="success" onClose={() => setSuccess('')}>{success}</Alert>}
 
       {/* Tabs */}
-      <div className="bg-white rounded-[32px] p-2 shadow-sm border border-slate-100 inline-flex gap-1">
+      <div className="neu-card-lg p-2 inline-flex gap-1">
         <button
           onClick={() => setActiveTab('pending')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${
@@ -158,7 +158,7 @@ const ApprovalsPage = () => {
       </div>
 
       {/* Approvals Table */}
-      <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-100 min-h-[400px]">
+      <div className="neu-card-lg p-8 min-h-[400px]">
         {loading ? (
              <div className="flex justify-center items-center h-[300px]">
                 <LoadingSpinner />
@@ -211,7 +211,7 @@ const ApprovalsPage = () => {
                     {/* Details Column */}
                     <td className="px-4 py-4 whitespace-nowrap pl-6">
                       <div className="flex items-center gap-3">
-                         <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center font-bold text-sm shadow-sm border border-slate-100">
+                         <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center font-bold text-sm">
                           {getEntityIcon(req.entityType)}
                         </div>
                         <div className="flex flex-col">
@@ -287,7 +287,8 @@ const ApprovalsPage = () => {
       >
         {selectedApproval && (() => {
           const d = selectedApproval.currentData || {};
-          const p = selectedApproval.payload || {};
+          const rawPayload = selectedApproval.payload;
+          const p = typeof rawPayload === 'string' ? (() => { try { return JSON.parse(rawPayload); } catch(e) { return {}; } })() : (rawPayload || {});
           const isCert = selectedApproval.entityType === 'Certificate' || selectedApproval.entityType === 'EntityCertificate';
           const isStaff = selectedApproval.entityType === 'Staff';
           const docUrl = p.docUrl || d.docUrl;
@@ -455,7 +456,7 @@ const ApprovalsPage = () => {
                 </div>
                 <div className="p-4">
                   <div className="grid grid-cols-2 gap-3">
-                    {Object.entries(selectedApproval.payload).filter(([k]) => !['id', 'staffId', 'entityId', 'userId', 'status'].includes(k)).map(([key, val]) => (
+                    {Object.entries(p).filter(([k]) => !['id', 'staffId', 'entityId', 'userId', 'status', 'isRenewal'].includes(k)).map(([key, val]) => (
                       <div key={key}>
                         <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-0.5">
                           {key.replace(/([A-Z])/g, ' $1').trim()}
