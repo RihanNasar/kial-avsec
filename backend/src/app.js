@@ -60,7 +60,7 @@ app.use("/uploads", (req, res, next) => {
   next();
 }, express.static("uploads"));
 
-app.use("/api/", generalLimiter); // Apply rate limiting to all API routes
+// app.use("/api/", generalLimiter); // Rate limiting disabled
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -68,7 +68,7 @@ app.get("/health", (req, res) => {
 });
 
 // Public Routes (no auth required)
-app.use("/api/auth/login", authLimiter); // Stricter limit for login
+// app.use("/api/auth/login", authLimiter); // Rate limiting disabled
 app.use("/api/auth", authRoutes);
 
 // Protected Routes (auth required)
